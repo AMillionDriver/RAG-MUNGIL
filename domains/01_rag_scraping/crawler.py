@@ -2,44 +2,44 @@ import os
 import json
 import urllib.parse
 from judge import SmartJudgeBot
-from explorer import AutonomousExplorer, HttpClient
+from explorer import AutonomousExplorer, ResilientHttpClient
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 RAW_DIR = os.path.join(CURRENT_DIR, "raw")
 
-# Seed Repo Pionir Emas Terverifikasi
-CURATED_SEEDS = [
+# Seed Kategori Beragam (TLS, Browser C++, CDP, Mobile, Stealth)
+DIVERSE_CURATED_SEEDS = [
+    # 1. TLS & JA3/JA4 Impersonation
     {"repo": "lexiforest/curl_cffi", "topic": "TLS JA3/JA4 Fingerprint Impersonation & HTTP/2 Bypass"},
-    {"repo": "kaliiiiiiiiii/Selenium-Stealth", "topic": "Selenium Chrome Fingerprint Masking"},
+    {"repo": "bogdanfinn/tls-client", "topic": "High-Performance TLS Evasion Client"},
+    {"repo": "lwthiker/curl-impersonate", "topic": "Engine C/C++ Level TLS Handshake Camouflage"},
+
+    # 2. Browser Engine Level C++ Spoofing
+    {"repo": "daijro/camoufox", "topic": "Firefox C++ Source-Level Anti-Detect Browser"},
+    {"repo": "kaliiiiiiiiii/Selenium-Stealth", "topic": "Chrome DevTools Protocol (CDP) Masking"},
     {"repo": "berstend/puppeteer-extra", "topic": "Puppeteer Stealth Plugin Architecture"},
-    {"repo": "daijro/camoufox", "topic": "Firefox C++ Engine Anti-Detect & Canvas/Audio Spoofing"},
-    {"repo": "gospider007/requests", "topic": "Go TLS Client & Anti-Bot Emulation"},
-    {"repo": "bogdanfinn/tls-client", "topic": "Advanced TLS Client for Golang & Python Bindings"},
-    {"repo": "lorien/grab", "topic": "High-level Web Scraping Architecture & Spider Framework"},
-    {"repo": "Scrapfly/scrapfly-python-sdk", "topic": "Anti-Scraping Defense Handling & Webhook Parsing"}
+
+    # 3. Modern Async & Undetected Frameworks
+    {"repo": "ultrafunkamsterdam/nodriver", "topic": "Asynchronous CDP Native Browser Without Webdriver"},
+    {"repo": "goflyway/goproxy", "topic": "Tunneling & Traffic Mutation Patterns"},
+    {"repo": "gcode-de/drissionpage", "topic": "Dual-Drive Web Control (DOM + Network Packet Sniffing)"}
 ]
 
 def main():
     os.makedirs(RAW_DIR, exist_ok=True)
     github_token = os.environ.get("GITHUB_TOKEN", "")
-    headers = {
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "RAG-Mungil-Harvester/3.0"
-    }
-    if github_token:
-        headers["Authorization"] = f"token {github_token}"
 
-    http = HttpClient(headers=headers, timeout=20)
-    judge = SmartJudgeBot(accept_threshold=60)
+    http = ResilientHttpClient(token=github_token, timeout=20)
+    judge = SmartJudgeBot(accept_threshold=75)
     explorer = AutonomousExplorer(http=http, judge=judge)
 
     print("==========================================================")
-    print("🚀 [RAG-MUNGIL] AUTONOMOUS EXPLORER & SMART JUDGE BOT v3.0")
+    print("🚀 [RAG-MUNGIL] AUTONOMOUS EXPLORER & SMART JUDGE BOT v4.0")
     print("==========================================================")
 
-    # 1. Verifikasi Curated Seeds
+    # 1. Ingest & Evaluasi Curated Seeds
     print("\n--- [Tahap 1: Verifikasi & Penilaian Curated Seeds] ---")
-    for seed in CURATED_SEEDS:
+    for seed in DIVERSE_CURATED_SEEDS:
         repo_name = seed["repo"]
         res = http.get(f"https://api.github.com/repos/{repo_name}")
         if res and res[0] == 200:
@@ -51,24 +51,25 @@ def main():
                     html_url=data.get("html_url", f"https://github.com/{repo_name}"),
                     stars=data.get("stargazers_count", 0),
                     default_branch=data.get("default_branch", "main"),
+                    pushed_at=data.get("pushed_at", ""),
                     custom_topic=seed["topic"]
                 )
             except Exception as e:
                 print(f"Gagal memproses seed {repo_name}: {e}")
 
-    # 2. Penjelajahan Internet Dinamis
-    print("\n--- [Tahap 2: Menjelajah Internet dengan Query Dinamis] ---")
-    dynamic_queries = explorer.generate_dynamic_queries(count=4)
-    print(f"Query terpilih untuk penjelajahan siklus ini: {dynamic_queries}")
-    explorer.explore_github_search(dynamic_queries)
+    # 2. Penjelajahan Stratified Query (Hidden Gems Discovery)
+    print("\n--- [Tahap 2: Menjelajah Stratified Queries (Targeting Hidden Gems)] ---")
+    stratified_queries = explorer.generate_stratified_queries(count=5)
+    print(f"Stratified queries siklus ini: {stratified_queries}")
+    explorer.explore_github_search(stratified_queries)
 
-    # 3. Penjelajahan HackerNews Engineering Discussions
+    # 3. HackerNews Engineering Discussions
     print("\n--- [Tahap 3: Menjelajah Diskusi Teknis HackerNews] ---")
     explorer.explore_hackernews()
 
     # 4. Simpan State Riwayat
     explorer.save_state()
-    print("\n🎉 Siklus penjelajahan & penghakiman selesai!")
+    print("\n🎉 Siklus penjelajahan & penghakiman v4.0 selesai!")
 
 if __name__ == "__main__":
     main()

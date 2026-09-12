@@ -1,125 +1,158 @@
 import os
 import json
+import re
 import hashlib
 from datetime import datetime
+from typing import Set, List
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-DOMAINS_DIR = os.path.join(ROOT_DIR, "domains")
-STORAGE_FINAL_DIR = os.path.join(ROOT_DIR, "storage_final")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DOMAINS_DIR = os.path.join(BASE_DIR, "domains")
+STORAGE_FINAL = os.path.join(BASE_DIR, "storage_final")
+REGISTRY_FILE = os.path.join(STORAGE_FINAL, "registry.json")
 
 def get_content_hash(text: str) -> str:
-    """Menghasilkan hash SHA-256 untuk memastikan tidak ada konten ganda."""
-    return hashlib.sha256(text.strip().encode("utf-8")).hexdigest()
+    # Normalisasi teks: hilangkan spasi berlebih dan case
+    clean = re.sub(r"\s+", " ", text.strip().lower())
+    return hashlib.sha256(clean.encode("utf-8")).hexdigest()
 
-def clean_and_normalize():
-    os.makedirs(STORAGE_FINAL_DIR, exist_ok=True)
-    registry_path = os.path.join(STORAGE_FINAL_DIR, "registry.json")
-    
-    registry = {}
-    if os.path.exists(registry_path):
+def get_token_set(text: str) -> Set[str]:
+    words = re.findall(r"\b[a-zA-Z0-9_]{3,}\b", text.lower())
+    return set(words)
+
+def jaccard_similarity(set1: Set[str], set2: Set[str]) -> float:
+    """Mengukur kemiripan konten untuk membasmi fork / copy-paste."""
+    if not set1 or not set2:
+        return 0.0
+    intersection = len(set1.intersection(set2))
+    union = len(set1.union(set2))
+    return intersection / union if union > 0 else 0.0
+
+def load_registry():
+    if os.path.exists(REGISTRY_FILE):
+        with open(REGISTRY_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {
+        "domains": {},
+        "total_records": 0,
+        "last_sync": "",
+        "hashes": []
+    }
+
+def save_registry(data):
+    os.makedirs(STORAGE_FINAL, exist_ok=True)
+    temp_file = REGISTRY_FILE + ".tmp"
+    with open(temp_file, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    os.replace(temp_file, REGISTRY_FILE)
+
+def process_domain(domain_name: str, registry: dict) -> int:
+    domain_dir = os.path.join(DOMAINS_DIR, domain_name)
+    raw_dir = os.path.join(domain_dir, "raw")
+    data_dir = os.path.join(domain_dir, "data")
+    os.makedirs(data_dir, exist_ok=True)
+
+    clean_file = os.path.join(data_dir, f"{domain_name}_clean.jsonl")
+
+    existing_hashes = set(registry.get("hashes", []))
+    existing_token_sets: List[Set[str]] = []
+
+    # Baca file clean yang sudah ada jika ada untuk bangun token sets
+    if os.path.exists(clean_file):
+        with open(clean_file, "r", encoding="utf-8") as f:
+            for line in f:
+                try:
+                    obj = json.loads(line)
+                    existing_token_sets.append(get_token_set(obj.get("content", "")))
+                except Exception:
+                    pass
+
+    if not os.path.exists(raw_dir):
+        return 0
+
+    added_count = 0
+    new_records = []
+
+    raw_files = [f for f in os.listdir(raw_dir) if f.endswith(".json")]
+    for file_name in raw_files:
+        file_path = os.path.join(raw_dir, file_name)
         try:
-            with open(registry_path, "r", encoding="utf-8") as f:
-                registry = json.load(f)
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
         except Exception:
-            registry = {}
-
-    total_added_global = 0
-
-    if not os.path.exists(DOMAINS_DIR):
-        print("Folder domains belum ada.")
-        return
-
-    for domain_folder in os.listdir(DOMAINS_DIR):
-        domain_path = os.path.join(DOMAINS_DIR, domain_folder)
-        if not os.path.isdir(domain_path):
             continue
 
-        raw_dir = os.path.join(domain_path, "raw")
-        data_dir = os.path.join(domain_path, "data")
-        os.makedirs(data_dir, exist_ok=True)
-
-        target_clean_jsonl = os.path.join(data_dir, f"{domain_folder}_clean.jsonl")
-
-        existing_hashes = set()
-        existing_records_count = 0
-        if os.path.exists(target_clean_jsonl):
-            with open(target_clean_jsonl, "r", encoding="utf-8") as f:
-                for line in f:
-                    try:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        record = json.loads(line)
-                        if "content" in record:
-                            existing_hashes.add(get_content_hash(record["content"]))
-                            existing_records_count += 1
-                    except Exception:
-                        continue
-
-        if not os.path.exists(raw_dir):
+        content = data.get("content", "")
+        # 1. Exact Normal Hash
+        c_hash = get_content_hash(content)
+        if c_hash in existing_hashes:
+            os.remove(file_path)
             continue
 
-        raw_files = [f for f in os.listdir(raw_dir) if f.endswith(".json")]
-        new_valid_records = []
+        # 2. Fuzzy Token Similarity Check (Basmi Fork & Copy-paste README)
+        curr_tokens = get_token_set(content)
+        is_fuzzy_duplicate = False
+        for old_tokens in existing_token_sets:
+            sim = jaccard_similarity(curr_tokens, old_tokens)
+            if sim >= 0.82:  # Jika 82% kata-kata sama, anggap fork/duplikat
+                is_fuzzy_duplicate = True
+                break
 
-        for rf in raw_files:
-            file_path = os.path.join(raw_dir, rf)
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    item = json.load(f)
+        if is_fuzzy_duplicate:
+            os.remove(file_path)
+            continue
 
-                content = item.get("content", "").strip()
-                title = item.get("title", "").strip()
-
-                # Filter ketat: minimal 100 karakter teks bermakna
-                if len(content) < 100 or len(title) < 5:
-                    os.remove(file_path)
-                    continue
-
-                if any(bad in content for bad in ["Just a moment...", "403 Forbidden", "Enable JavaScript"]):
-                    os.remove(file_path)
-                    continue
-
-                c_hash = get_content_hash(content)
-                if c_hash in existing_hashes:
-                    os.remove(file_path)
-                    continue
-
-                clean_record = {
-                    "id": item.get("id", f"{domain_folder}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"),
-                    "domain": item.get("domain", domain_folder),
-                    "title": title,
-                    "summary": item.get("summary", title),
-                    "content": content,
-                    "source_url": item.get("source_url", ""),
-                    "created_at": item.get("created_at", datetime.utcnow().isoformat() + "Z"),
-                    "metadata": item.get("metadata", {})
-                }
-
-                new_valid_records.append(clean_record)
-                existing_hashes.add(c_hash)
-                os.remove(file_path)
-
-            except Exception as e:
-                print(f"Error processing {file_path}: {e}")
-                continue
-
-        if new_valid_records:
-            with open(target_clean_jsonl, "a", encoding="utf-8") as f:
-                for rec in new_valid_records:
-                    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-            total_added_global += len(new_valid_records)
-            print(f"[{domain_folder}] Ditambahkan: {len(new_valid_records)} materi.")
-
-        registry[domain_folder] = {
-            "last_updated": datetime.utcnow().isoformat() + "Z",
-            "total_records": existing_records_count + len(new_valid_records)
+        # Format Fixed Core + Dynamic Metadata
+        clean_record = {
+            "id": data.get("id"),
+            "domain": domain_name,
+            "title": data.get("title"),
+            "summary": data.get("summary"),
+            "content": content,
+            "source_url": data.get("source_url"),
+            "created_at": data.get("created_at"),
+            "metadata": data.get("metadata", {})
         }
 
-    with open(registry_path, "w", encoding="utf-8") as f:
-        json.dump(registry, f, indent=2)
+        new_records.append(clean_record)
+        existing_hashes.add(c_hash)
+        existing_token_sets.append(curr_tokens)
+        added_count += 1
+        os.remove(file_path)
 
-    print(f"Pembersihan selesai! Total materi baru: {total_added_global}")
+    # 3. Atomic Append ke file JSONL
+    if new_records:
+        temp_clean_file = clean_file + ".tmp"
+        # Salin yang lama
+        if os.path.exists(clean_file):
+            with open(clean_file, "r", encoding="utf-8") as f_in, open(temp_clean_file, "w", encoding="utf-8") as f_out:
+                f_out.write(f_in.read())
+        
+        with open(temp_clean_file, "a" if os.path.exists(temp_clean_file) else "w", encoding="utf-8") as f:
+            for rec in new_records:
+                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        
+        os.replace(temp_clean_file, clean_file)
+
+    registry["hashes"] = list(existing_hashes)
+    return added_count
+
+def main():
+    registry = load_registry()
+    total_added = 0
+
+    if os.path.exists(DOMAINS_DIR):
+        for domain in sorted(os.listdir(DOMAINS_DIR)):
+            domain_path = os.path.join(DOMAINS_DIR, domain)
+            if os.path.isdir(domain_path) and not domain.startswith("."):
+                added = process_domain(domain, registry)
+                if added > 0:
+                    print(f"[{domain}] Terverifikasi & Ditambahkan: {added} materi Gold.")
+                total_added += added
+
+    registry["total_records"] = registry.get("total_records", 0) + total_added
+    registry["last_sync"] = datetime.utcnow().isoformat() + "Z"
+    save_registry(registry)
+    print(f"Pembersihan selesai! Total materi baru: {total_added}")
 
 if __name__ == "__main__":
-    clean_and_normalize()
+    main()

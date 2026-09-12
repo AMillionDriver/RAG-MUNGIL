@@ -6,7 +6,7 @@ __pycache__/
 # Temporary and raw ingestion artifacts
 domains/*/raw/
 *.tmp
-exploration_history.json
+
 
 # Environments
 .env

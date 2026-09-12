@@ -133,7 +133,8 @@ def process_domain(domain_name: str, registry: dict) -> int:
         
         os.replace(temp_clean_file, clean_file)
 
-    registry["hashes"] = list(existing_hashes)
+    # Batasi kapasitas registry hashes (LRU-style cap di 3000 hashes terbaru agar file tidak bengkak)
+    registry["hashes"] = list(existing_hashes)[-3000:]
     return added_count
 
 def main():

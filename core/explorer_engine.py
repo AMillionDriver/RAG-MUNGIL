@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import fnmatch
 import random
 import time
 import urllib.request
@@ -14,7 +15,7 @@ USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
     "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0",
-    "RAG-Mungil-Harvester/5.0 (Enterprise-Harvester; Open-Source Research)"
+    "RAG-Mungil-Harvester/6.0 (Enterprise-Harvester; Open-Source Research)"
 ]
 
 class ResilientHttpClient:
@@ -68,9 +69,10 @@ class ResilientHttpClient:
 class AutonomousExplorer:
     """
     Universal Domain-Agnostic Explorer:
+    - Ingestion multi-target (README + source code pattern file fetcher via Tree API).
     - Membaca target & template pencarian dari config domain.
     - Menjelajah repositori GitHub dan referensi outbound (Link Hopper).
-    - Memproses diskusi teknis HackerNews yang relevan dengan domain.
+    - Memproses diskusi teknis HackerNews.
     - Menyimpan artefak valid ke direktori raw domain target.
     """
     def __init__(self, http: ResilientHttpClient, judge: SmartJudgeBot, config: Dict[str, Any], domain_dir: str):
@@ -81,6 +83,11 @@ class AutonomousExplorer:
         self.domain_dir = domain_dir
         self.raw_dir = os.path.join(domain_dir, "raw")
         self.history_file = os.path.join(domain_dir, "exploration_history.json")
+
+        # Ingestion Target Config
+        ingestion_targets = config.get("ingestion_targets", {})
+        self.source_file_patterns: List[str] = ingestion_targets.get("source_file_patterns", [])
+        self.max_source_files: int = ingestion_targets.get("max_source_files", 3)
 
         os.makedirs(self.raw_dir, exist_ok=True)
         self.history = self._load_history()
@@ -126,7 +133,7 @@ class AutonomousExplorer:
         return list(set(queries))[:count]
 
     def extract_actionable_code_blocks(self, text: str) -> List[str]:
-        pattern = r"```(?:python|py|javascript|js|bash|sh|go|cpp|ts|tsx)?\n(.*?)```"
+        pattern = r"```(?:[a-zA-Z0-9_-]+)?\n(.*?)```"
         matches = re.findall(pattern, text, re.DOTALL)
         valid_blocks = []
         for m in matches:
@@ -134,6 +141,51 @@ class AutonomousExplorer:
             if len(m_clean) > 40 and not m_clean.startswith("#"):
                 valid_blocks.append(m_clean)
         return valid_blocks[:6]
+
+    def fetch_source_code_files(self, repo_full_name: str, default_branch: str) -> str:
+        """
+        Mengambil konten file source code asli (*.t.sol, *.sol, *.py, dll)
+        berdasarkan pola glob di ingestion_targets.
+        """
+        if not self.source_file_patterns:
+            return ""
+
+        tree_url = f"https://api.github.com/repos/{repo_full_name}/git/trees/{default_branch}?recursive=1"
+        res = self.http.get(tree_url)
+        if not res or res[0] != 200:
+            return ""
+
+        try:
+            tree_data = json.loads(res[1])
+            tree = tree_data.get("tree", [])
+        except Exception:
+            return ""
+
+        matched_paths = []
+        for item in tree:
+            if item.get("type") != "blob":
+                continue
+            path = item.get("path", "")
+            for pat in self.source_file_patterns:
+                if fnmatch.fnmatch(path, pat) or fnmatch.fnmatch(os.path.basename(path), pat):
+                    matched_paths.append(path)
+                    break
+
+        if not matched_paths:
+            return ""
+
+        # Batasi pengambilan file agar tidak melebihi kuota/timeout
+        matched_paths = matched_paths[:self.max_source_files]
+        combined_source = "\n\n### 📦 Source Code Files (Foundry / Exploit PoC / Source):\n"
+
+        for path in matched_paths:
+            raw_file_url = f"https://raw.githubusercontent.com/{repo_full_name}/{default_branch}/{path}"
+            file_res = self.http.get(raw_file_url)
+            if file_res and file_res[0] == 200:
+                ext = path.split(".")[-1] if "." in path else ""
+                combined_source += f"\nFile: `{path}`\n```{ext}\n{file_res[1][:4000]}\n```\n"
+
+        return combined_source
 
     def process_github_repo(self, repo_full_name: str, desc: str, html_url: str, stars: int,
                             default_branch: str = "main", pushed_at: str = "", custom_topic: str = ""):
@@ -145,11 +197,16 @@ class AutonomousExplorer:
         if not res or res[0] != 200:
             res = self.http.get(f"{raw_url}/readme.md")
 
-        if not res or res[0] != 200:
+        content = res[1] if (res and res[0] == 200) else ""
+
+        # Tarik source code files jika domain memintanya (misal PoC Foundry / Exploit)
+        source_code_content = self.fetch_source_code_files(repo_full_name, default_branch)
+        full_content = (content + "\n\n" + source_code_content).strip()
+
+        if not full_content:
             self.rejected_items.add(repo_full_name)
             return
 
-        content = res[1]
         metadata = {
             "stars": stars,
             "repo_name": repo_full_name,
@@ -159,7 +216,7 @@ class AutonomousExplorer:
         # Evaluasi dengan Judge
         accepted, score, judge_logs = self.judge.evaluate(
             title=custom_topic or desc or repo_full_name,
-            content=content,
+            content=full_content,
             metadata=metadata
         )
 
@@ -169,12 +226,12 @@ class AutonomousExplorer:
             return
 
         print(f"✨ [Judge ACCEPT] ({score} pts) {repo_full_name} -> Lolos kurasi Gold!")
-        code_snippets = self.extract_actionable_code_blocks(content)
+        code_snippets = self.extract_actionable_code_blocks(full_content)
 
         # Ekstraksi tag spesifik dari config domain
         tag_labels = self.config.get("target_waf_tags", [])
         matched_tags = []
-        content_lower = content.lower()
+        content_lower = full_content.lower()
         for tag in tag_labels:
             if tag.lower() in content_lower:
                 matched_tags.append(tag.capitalize())
@@ -185,7 +242,7 @@ class AutonomousExplorer:
             "domain": self.domain_id,
             "title": f"Teknik: {custom_topic or repo_full_name}",
             "summary": desc or f"Dokumentasi & implementasi teknik dari {repo_full_name}",
-            "content": content[:14000],
+            "content": full_content[:18000],
             "source_url": html_url,
             "created_at": datetime.utcnow().isoformat() + "Z",
             "metadata": {
@@ -208,7 +265,7 @@ class AutonomousExplorer:
         self.visited_repos.add(repo_full_name)
 
         # Recursive Link Hopper (maksimal 8 investigasi per repo)
-        outbound_repos = re.findall(r"github\.com/([a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+)", content)
+        outbound_repos = re.findall(r"github\.com/([a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+)", full_content)
         probed = 0
         IGNORED_PREFIXES = [
             "topics/", "features/", "sponsors/", "settings/", "user-attachments/",

@@ -74,7 +74,7 @@ def process_domain(domain_name: str, registry: dict) -> int:
                     pass
 
     if not os.path.exists(raw_dir):
-        return 0
+        return 0, []
 
     added_count = 0
     new_records = []

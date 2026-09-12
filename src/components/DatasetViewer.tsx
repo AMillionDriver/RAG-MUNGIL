@@ -8,6 +8,7 @@ interface DatasetViewerProps {
 
 export default function DatasetViewer({ dataset }: DatasetViewerProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDomain, setSelectedDomain] = useState<string>('ALL');
   const [selectedWaf, setSelectedWaf] = useState<string>('ALL');
   const [selectedTier, setSelectedTier] = useState<string>('ALL');
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -24,6 +25,9 @@ export default function DatasetViewer({ dataset }: DatasetViewerProps) {
       record.content.toLowerCase().includes(q) ||
       record.metadata.repo_name?.toLowerCase().includes(q);
 
+    const matchDomain =
+      selectedDomain === 'ALL' || record.domain === selectedDomain;
+
     const matchWaf =
       selectedWaf === 'ALL' ||
       record.metadata.bypassed_wafs?.some(
@@ -33,7 +37,7 @@ export default function DatasetViewer({ dataset }: DatasetViewerProps) {
     const matchTier =
       selectedTier === 'ALL' || record.metadata.tier === selectedTier;
 
-    return matchSearch && matchWaf && matchTier;
+    return matchSearch && matchDomain && matchWaf && matchTier;
   });
 
   const handleCopyCode = (id: string, code: string) => {
@@ -83,25 +87,64 @@ export default function DatasetViewer({ dataset }: DatasetViewerProps) {
           </div>
         </div>
 
-        {/* WAF Tag Filters */}
+        {/* Domain Filters */}
         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
           <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold flex items-center gap-1 mr-1">
-            <Shield className="w-3 h-3" /> Filter WAF:
+            <Filter className="w-3 h-3" /> Domain:
           </span>
-          {wafList.map((waf) => (
-            <button
-              key={waf}
-              onClick={() => setSelectedWaf(waf)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all ${
-                selectedWaf === waf
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold'
-                  : 'bg-white/[0.02] text-white/50 hover:text-white border border-white/5'
-              }`}
-            >
-              {waf}
-            </button>
-          ))}
+          <button
+            onClick={() => setSelectedDomain('ALL')}
+            className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all ${
+              selectedDomain === 'ALL'
+                ? 'bg-white/15 text-white border border-white/20 font-semibold'
+                : 'bg-white/[0.02] text-white/50 hover:text-white border border-white/5'
+            }`}
+          >
+            Semua Domain
+          </button>
+          <button
+            onClick={() => setSelectedDomain('01_rag_scraping')}
+            className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all ${
+              selectedDomain === '01_rag_scraping'
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold'
+                : 'bg-white/[0.02] text-white/50 hover:text-white border border-white/5'
+            }`}
+          >
+            🛡️ 01: Scraping & Anti-Bot
+          </button>
+          <button
+            onClick={() => setSelectedDomain('02_web3_smart_contract')}
+            className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all ${
+              selectedDomain === '02_web3_smart_contract'
+                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30 font-semibold'
+                : 'bg-white/[0.02] text-white/50 hover:text-white border border-white/5'
+            }`}
+          >
+            ⛓️ 02: Web3 & Smart Contract
+          </button>
         </div>
+
+        {/* WAF Tag Filters */}
+        {selectedDomain !== '02_web3_smart_contract' && (
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold flex items-center gap-1 mr-1">
+              <Shield className="w-3 h-3" /> Target WAF:
+            </span>
+            {wafList.map((waf) => (
+              <button
+                key={waf}
+                onClick={() => setSelectedWaf(waf)}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all ${
+                  selectedWaf === waf
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold'
+                    : 'bg-white/[0.02] text-white/50 hover:text-white border border-white/5'
+                }`}
+              >
+                {waf}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Records List */}
@@ -132,6 +175,16 @@ export default function DatasetViewer({ dataset }: DatasetViewerProps) {
 
                     <span className="text-[11px] font-mono text-white/40">
                       ID: {record.id}
+                    </span>
+
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium ${
+                        record.domain === '02_web3_smart_contract'
+                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      }`}
+                    >
+                      {record.domain}
                     </span>
 
                     {record.metadata.stars !== undefined && record.metadata.stars > 0 && (
@@ -173,22 +226,36 @@ export default function DatasetViewer({ dataset }: DatasetViewerProps) {
                 </div>
               </div>
 
-              {/* Target WAF Badges */}
-              {record.metadata.bypassed_wafs && (
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold mr-1">
-                    Bypass Targets:
-                  </span>
-                  {record.metadata.bypassed_wafs.map((waf) => (
-                    <span
-                      key={waf}
-                      className="px-2 py-0.5 rounded-md bg-white/[0.04] text-white/70 border border-white/10 text-[10px] font-mono"
-                    >
-                      {waf}
+              {/* Badges: Target WAF or Web3 Vuln/Protocol */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {record.metadata.bypassed_wafs && (
+                  <>
+                    <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold mr-1">
+                      Bypass Targets:
                     </span>
-                  ))}
-                </div>
-              )}
+                    {record.metadata.bypassed_wafs.map((waf) => (
+                      <span
+                        key={waf}
+                        className="px-2 py-0.5 rounded-md bg-white/[0.04] text-white/70 border border-white/10 text-[10px] font-mono"
+                      >
+                        {waf}
+                      </span>
+                    ))}
+                  </>
+                )}
+
+                {record.metadata.vuln_type && (
+                  <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20 text-[10px] font-mono">
+                    Celah: {record.metadata.vuln_type}
+                  </span>
+                )}
+
+                {record.metadata.protocol && (
+                  <span className="px-2 py-0.5 rounded-md bg-white/[0.04] text-white/60 border border-white/10 text-[10px] font-mono">
+                    Protokol: {record.metadata.protocol}
+                  </span>
+                )}
+              </div>
 
               {/* Code Snippet Box */}
               {record.metadata.code_snippets && record.metadata.code_snippets.length > 0 && (

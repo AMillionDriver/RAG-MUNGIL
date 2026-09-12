@@ -11,16 +11,14 @@ import {
   ExternalLink,
   BookOpen,
   FolderGit2,
-  CheckCircle2,
-  Smartphone
+  CheckCircle2
 } from 'lucide-react';
 import { INITIAL_DATASET, RagRecord } from './data/scrapingDataset';
 import DatasetViewer from './components/DatasetViewer';
 import CodexBridgeGuide from './components/CodexBridgeGuide';
 import GitHubWorkflowStatus from './components/GitHubWorkflowStatus';
-import ApkWorkflowGuide from './components/ApkWorkflowGuide';
 
-type ActiveTab = 'dataset' | 'codex' | 'workflow' | 'apk';
+type ActiveTab = 'dataset' | 'codex' | 'workflow';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dataset');
@@ -92,11 +90,11 @@ export default function App() {
 
           <div className="bg-[#121214] p-3.5 rounded-xl border border-white/10">
             <div className="flex items-center justify-between text-white/40 text-[11px] font-mono">
-              <span>WAF TARGETS</span>
+              <span>ACTIVE DOMAINS</span>
               <ShieldAlert className="w-3.5 h-3.5 text-purple-400" />
             </div>
-            <div className="text-xl font-bold text-white mt-1 font-mono">{wafCount}+ Proteksi</div>
-            <div className="text-[10px] text-purple-300/80 mt-0.5">Cloudflare, Akamai, etc.</div>
+            <div className="text-xl font-bold text-white mt-1 font-mono">2 Domains</div>
+            <div className="text-[10px] text-purple-300/80 mt-0.5">Scraping + Web3 Security</div>
           </div>
 
           <div className="bg-[#121214] p-3.5 rounded-xl border border-white/10">
@@ -147,18 +145,6 @@ export default function App() {
               <FolderGit2 className="w-3.5 h-3.5" />
               <span>GitHub Actions & Sync</span>
             </button>
-
-            <button
-              onClick={() => setActiveTab('apk')}
-              className={`px-4 py-2 text-xs font-semibold rounded-t-xl transition-all flex items-center gap-2 border-b-2 ${
-                activeTab === 'apk'
-                  ? 'border-amber-400 text-white bg-white/[0.04]'
-                  : 'border-transparent text-white/40 hover:text-white/80'
-              }`}
-            >
-              <Smartphone className="w-3.5 h-3.5" />
-              <span>Android APK Builder</span>
-            </button>
           </div>
         </div>
 
@@ -197,18 +183,6 @@ export default function App() {
               transition={{ duration: 0.2 }}
             >
               <GitHubWorkflowStatus />
-            </motion.div>
-          )}
-
-          {activeTab === 'apk' && (
-            <motion.div
-              key="tab-apk"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ApkWorkflowGuide />
             </motion.div>
           )}
         </AnimatePresence>

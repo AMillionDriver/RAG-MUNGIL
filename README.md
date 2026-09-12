@@ -12,8 +12,15 @@ Dataset yang dihasilkan disimpan dalam format **Clean JSONL** dengan skema *Fixe
 | Domain ID | Topik & Cakupan | Total Records | Status Kurasi | File Path |
 | :--- | :--- | :---: | :---: | :--- |
 | `01_rag_scraping` | Web Scraping, TLS/JA4 Evasion, Anti-Bot Bypass | **31** | Gold Tier | `domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl` |
+| `02_web3_smart_contract` | Web3 & Smart Contract Security, Foundry PoCs, Audits | **4+** | Gold Tier | `domains/02_web3_smart_contract/data/02_web3_smart_contract_clean.jsonl` |
 
-> *Catatan: Total 31 records telah lolos validasi deduplikasi SHA-256 dan fuzzy Jaccard similarity.*
+> *Catatan: Semua records melalui validasi deduplikasi SHA-256 dan fuzzy Jaccard similarity.*
+
+### 🔗 Sinergi Operasional: Domain 1 + Domain 2
+Domain 1 (*Anti-Bot & Web Scraping Evasion*) bukan sekadar topik acak, melainkan **toolkit operasional** langsung yang memungkinkan pemanenan Domain 2 (*Web3 & Smart Contract Security*) berjalan reliable:
+1. **Bypass Proteksi Platform Audit**: Platform agregator seperti Solodit, Etherscan/BscScan explorer, dan contest platform sering membatasi API key dan menerapkan rate-limit/Cloudflare. Teknik dari Domain 1 (impersonation `curl-cffi`, `camoufox`, CDP stealth) digunakan untuk memanen konten ini tanpa terblokir.
+2. **Evergreen Scoring Mode (`recency_sensitive: false`)**: Insiden historis kanonikal (seperti *TheDAO hack*, *Parity multisig*, *Euler Finance*) tidak dipenalti usang karena prinsip keamanan smart contract bersifat abadi (*evergreen*).
+3. **Ingesti Source Code Asli (`fetch_source_code_files`)**: Menarik file implementasi kode nyata (`*.t.sol`, `*.sol`, `*.vy`) via GitHub Git Tree API untuk mendapatkan script PoC Foundry (`forge test`) lengkap, bukan hanya teks README.
 
 ---
 
@@ -26,13 +33,16 @@ RAG-MUNGIL/
 ├── core/                       # Core Engines (Domain-Agnostic & Reusable)
 │   ├── crawler_engine.py       # Orchestrator & Pluggable Source Adapters (Seeds, Search, HackerNews)
 │   ├── explorer_engine.py      # Resilient Client, Tree API Source Fetcher, & Recursive Link Hopper
-│   └── judge_engine.py         # Heuristic Judge Bot (Recency, Code Verification, Anti-Spam Gate)
+│   ├── judge_engine.py         # Heuristic Judge Bot (Recency, Code Verification, Anti-Spam Gate)
+│   └── add_domain.py           # CLI Scaffolder untuk menambah domain baru secara instan
 ├── domains/                    # Domain Plugins (Deklaratif)
-│   └── 01_rag_scraping/        # DOMAIN 1: Anti-Bot & Web Scraping Evasion
-│       ├── config.json         # Konfigurasi domain (keywords, weights, signatures, seeds, strategy)
-│       ├── exploration_history.json # Persistent graph traversal memory (visited repos & items)
-│       └── data/
-│           └── 01_rag_scraping_clean.jsonl # DATASET GOLD FINAL (RAG-Ready JSONL)
+│   ├── 01_rag_scraping/        # DOMAIN 1: Anti-Bot & Web Scraping Evasion
+│   │   ├── config.json         # Konfigurasi domain (keywords, weights, signatures, seeds, strategy)
+│   │   ├── exploration_history.json # Persistent graph traversal memory (visited repos & items)
+│   │   └── data/01_rag_scraping_clean.jsonl # DATASET GOLD FINAL (RAG-Ready JSONL)
+│   └── 02_web3_smart_contract/ # DOMAIN 2: Web3 & Smart Contract Security (Code4rena, Sherlock, Foundry)
+│       ├── config.json         # Konfigurasi domain (Foundry signatures, evergreen mode, source glob)
+│       └── data/02_web3_smart_contract_clean.jsonl # DATASET GOLD FINAL (RAG-Ready JSONL)
 ├── storage_final/
 │   ├── registry.json           # Manifest sinkronisasi & hash fingerprinting
 │   └── search_cache.db         # Cache Inverted Index SQLite FTS5 untuk pencarian instan

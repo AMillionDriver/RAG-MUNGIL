@@ -1,0 +1,169 @@
+{
+  "domain_id": "02_web3_smart_contract",
+  "domain_label": "Web3 & Smart Contract Security",
+  "accept_threshold": 75,
+  "min_word_count": 100,
+  "code_over_text_tolerance": true,
+  "scoring_strategy": {
+    "recency_sensitive": false,
+    "evergreen_bonus": true
+  },
+  "ingestion_targets": {
+    "primary": "README.md",
+    "source_file_patterns": [
+      "*.t.sol",
+      "*.sol",
+      "*.vy"
+    ],
+    "max_source_files": 5
+  },
+  "enabled_sources": [
+    "github_seeds",
+    "github_search",
+    "hackernews"
+  ],
+  "seeds": [
+    {
+      "repo": "SunWeb3Sec/DeFiHackLabs",
+      "topic": "DeFi Exploit Reproductions & Foundry Test PoCs"
+    },
+    {
+      "repo": "code-423n4/2023-01-biconomy-findings",
+      "topic": "Code4rena Competitive Audit Findings & Vulnerabilities"
+    },
+    {
+      "repo": "sherlock-audit/2023-02-carapace-judging",
+      "topic": "Sherlock Competitive Judging Reports & Bug Disclosures"
+    },
+    {
+      "repo": "immunefi-team/bounty-writeups",
+      "topic": "Immunefi Web3 Bug Bounty Writeups & Root Cause Analyses"
+    },
+    {
+      "repo": "crytic/building-secure-contracts",
+      "topic": "Trail of Bits Security Engineering & Smart Contract Vulnerabilities"
+    },
+    {
+      "repo": "OffcierCia/DeFi-Developer-Road-Map",
+      "topic": "DeFi Security Audits, Attack Vectors & Incident Post-Mortems"
+    },
+    {
+      "repo": "kadenzipfel/smart-contract-vulnerabilities",
+      "topic": "Smart Contract Vulnerability Taxonomy, Attack Mechanics & Mitigations"
+    },
+    {
+      "repo": "zaryabs/smart-contract-vulnerabilities",
+      "topic": "Curated Solidity Vulnerabilities with Foundry Verification PoCs"
+    }
+  ],
+  "stratified_query_templates": [
+    "\"{vuln}\" \"foundry\" test exploit stars:5..2500",
+    "\"{vuln}\" \"{tool}\" audit writeup",
+    "\"code4rena\" findings \"{vuln}\"",
+    "\"sherlock\" audit findings \"{vuln}\"",
+    "\"immunefi\" bug bounty \"{vuln}\"",
+    "\"forge test\" exploit poc sol",
+    "\"reentrancy\" \"vm.prank\" sol",
+    "\"flash loan\" attack foundry test"
+  ],
+  "template_variables": {
+    "vuln": [
+      "reentrancy",
+      "flash loan",
+      "oracle manipulation",
+      "read-only reentrancy",
+      "access control",
+      "signature replay",
+      "precision loss",
+      "erc4626 inflation",
+      "sandwich attack",
+      "governance attack"
+    ],
+    "tool": [
+      "foundry",
+      "forge test",
+      "hardhat",
+      "slither"
+    ]
+  },
+  "hn_queries": [
+    "smart contract exploit foundry",
+    "defi hack post-mortem",
+    "solidity vulnerability writeup",
+    "code4rena finding"
+  ],
+  "target_waf_tags": [
+    "solodit",
+    "code4rena",
+    "sherlock",
+    "immunefi",
+    "etherscan",
+    "bscscan"
+  ],
+  "actionable_code_signatures": [
+    "function\\s+test",
+    "contract\\s+\\w+Test\\s+is\\s+Test",
+    "vm\\.prank",
+    "vm\\.deal",
+    "vm\\.warp",
+    "vm\\.roll",
+    "vm\\.expectRevert",
+    "forge-std",
+    "console2\\.log",
+    "address\\(this\\)\\.balance",
+    "\\.(?:call|delegatecall)\\(",
+    "selfdestruct\\(",
+    "IERC20\\(",
+    "nonReentrant",
+    "revert\\s+[A-Z]\\w+\\(",
+    "require\\("
+  ],
+  "dummy_code_patterns": [
+    "contract\\s+SimpleStorage",
+    "pragma\\s+solidity\\s+\\^0\\.4",
+    "string\\s+public\\s+greet\\s*=\\s*\"Hello World\""
+  ],
+  "technical_keywords": {
+    "reentrancy": 15,
+    "read-only reentrancy": 15,
+    "flash loan": 15,
+    "oracle manipulation": 15,
+    "twap": 10,
+    "spot price": 10,
+    "access control": 12,
+    "signature replay": 12,
+    "ecrecover": 10,
+    "erc4626": 12,
+    "precision loss": 12,
+    "rounding error": 10,
+    "sandwich attack": 12,
+    "slippage": 10,
+    "mev": 10,
+    "foundry": 12,
+    "forge test": 15,
+    "invariant": 12,
+    "fuzz testing": 10,
+    "vm.prank": 15,
+    "delegatecall": 12,
+    "code4rena": 15,
+    "sherlock": 15,
+    "immunefi": 15,
+    "solodit": 15,
+    "audit report": 12,
+    "writeup": 10,
+    "proof of concept": 12,
+    "exploit": 12,
+    "thedao": 15,
+    "euler": 15,
+    "nomad": 12
+  },
+  "spam_patterns": [
+    "free\\s+(?:airdrop|tokens?|crypto)",
+    "claim\\s+(?:your\\s+)?(?:airdrop|rewards?)",
+    "presale\\s+live",
+    "buy\\s+\\$\\w+\\s+token",
+    "join\\s+our\\s+telegram\\s+for\\s+signals",
+    "100x\\s+gem",
+    "pump\\s+and\\s+dump"
+  ]
+}

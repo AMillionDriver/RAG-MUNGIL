@@ -11,11 +11,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # TAHAP 1: Crawling & Harvesting secara paralel di tiap node matrix
+  # Tidak ada git push di tahap ini sehingga kebal race-condition!
   harvest-matrix:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     strategy:
       fail-fast: false
       matrix:
@@ -37,20 +36,66 @@ jobs:
         run: |
           python -m core.crawler_engine --domain ${{ matrix.domain }}
 
+      # Simpan output raw data dan history domain ini sebagai artifact sementara
+      - name: Upload Harvested Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: harvest-data-${{ matrix.domain }}
+          path: |
+            domains/${{ matrix.domain }}/raw/
+            domains/${{ matrix.domain }}/exploration_history.json
+          retention-days: 1
+
+  # TAHAP 2: Agregasi, Normalisasi Bersih (DATA_CLEANER), dan Single Atomic Git Commit
+  # Hanya berjalan setelah SEMUA node matrix harvest selesai
+  aggregate-and-commit:
+    needs: harvest-matrix
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # Download semua artefak dari tiap matrix job
+      - name: Download All Harvested Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded-artifacts
+
+      # Susun kembali file raw & history ke folder masing-masing domain
+      - name: Reassemble Domain Artifacts
+        run: |
+          if [ -d "downloaded-artifacts" ]; then
+            for artifact_dir in downloaded-artifacts/*; do
+              if [ -d "$artifact_dir/domains" ]; then
+                cp -rf "$artifact_dir/domains/"* domains/ || true
+              fi
+            done
+          fi
+
       - name: Run Data Cleaner & Normalizer
         run: |
           python DATA_CLEANER.py
 
-      - name: Auto Commit & Push Clean Data
+      - name: Single Atomic Commit & Push
         run: |
           git config --global user.name "Mungil RAG Bot"
           git config --global user.email "bot@users.noreply.github.com"
           git add domains/ storage_final/
-          
+
           if git diff --staged --quiet; then
             echo "Tidak ada data baru pada putaran ini."
           else
             git commit -m "chore(rag): auto-harvest gold-tier techniques [skip ci]"
-            git pull --rebase origin main
-            git push origin main
+            # Retry loop resilient jika ada push konkuren
+            for i in {1..3}; do
+              git pull --rebase origin main && git push origin main && break || sleep 5
+            done
           fi

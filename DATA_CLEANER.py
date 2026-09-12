@@ -8,7 +8,7 @@ DOMAINS_DIR = os.path.join(ROOT_DIR, "domains")
 STORAGE_FINAL_DIR = os.path.join(ROOT_DIR, "storage_final")
 
 def get_content_hash(text: str) -> str:
-    """Menghasilkan hash SHA-256 untuk mendeteksi data duplikat."""
+    """Menghasilkan hash SHA-256 untuk memastikan tidak ada konten ganda."""
     return hashlib.sha256(text.strip().encode("utf-8")).hexdigest()
 
 def clean_and_normalize():
@@ -25,7 +25,10 @@ def clean_and_normalize():
 
     total_added_global = 0
 
-    # Iterasi semua folder domain
+    if not os.path.exists(DOMAINS_DIR):
+        print("Folder domains belum ada.")
+        return
+
     for domain_folder in os.listdir(DOMAINS_DIR):
         domain_path = os.path.join(DOMAINS_DIR, domain_folder)
         if not os.path.isdir(domain_path):
@@ -37,15 +40,19 @@ def clean_and_normalize():
 
         target_clean_jsonl = os.path.join(data_dir, f"{domain_folder}_clean.jsonl")
 
-        # Load data yang sudah ada untuk cek duplikasi
         existing_hashes = set()
+        existing_records_count = 0
         if os.path.exists(target_clean_jsonl):
             with open(target_clean_jsonl, "r", encoding="utf-8") as f:
                 for line in f:
                     try:
+                        line = line.strip()
+                        if not line:
+                            continue
                         record = json.loads(line)
                         if "content" in record:
                             existing_hashes.add(get_content_hash(record["content"]))
+                            existing_records_count += 1
                     except Exception:
                         continue
 
@@ -61,31 +68,29 @@ def clean_and_normalize():
                 with open(file_path, "r", encoding="utf-8") as f:
                     item = json.load(f)
 
-                # Validasi Fixed Core Envelop
                 content = item.get("content", "").strip()
                 title = item.get("title", "").strip()
 
-                # Filter data sampah: terlalu pendek, kosong, atau halaman block
-                if len(content) < 80 or len(title) < 5:
+                # Filter ketat: minimal 100 karakter teks bermakna
+                if len(content) < 100 or len(title) < 5:
                     os.remove(file_path)
                     continue
 
-                if "Just a moment..." in content or "403 Forbidden" in content:
+                if any(bad in content for bad in ["Just a moment...", "403 Forbidden", "Enable JavaScript"]):
                     os.remove(file_path)
                     continue
 
                 c_hash = get_content_hash(content)
                 if c_hash in existing_hashes:
-                    os.remove(file_path) # Hapus file raw karena sudah pernah ada
+                    os.remove(file_path)
                     continue
 
-                # Normalisasi Record Sesuai Standar Fixed + Dynamic Metadata
                 clean_record = {
-                    "id": item.get("id", f"{domain_folder}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{len(new_valid_records)}"),
+                    "id": item.get("id", f"{domain_folder}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"),
                     "domain": item.get("domain", domain_folder),
                     "title": title,
-                    "content": content,
                     "summary": item.get("summary", title),
+                    "content": content,
                     "source_url": item.get("source_url", ""),
                     "created_at": item.get("created_at", datetime.utcnow().isoformat() + "Z"),
                     "metadata": item.get("metadata", {})
@@ -93,31 +98,28 @@ def clean_and_normalize():
 
                 new_valid_records.append(clean_record)
                 existing_hashes.add(c_hash)
-                os.remove(file_path) # Raw sudah diproses, hapus agar disk hemat
+                os.remove(file_path)
 
             except Exception as e:
-                print(f"Error parsing {file_path}: {e}")
+                print(f"Error processing {file_path}: {e}")
                 continue
 
-        # Append data bersih ke file final
         if new_valid_records:
             with open(target_clean_jsonl, "a", encoding="utf-8") as f:
                 for rec in new_valid_records:
                     f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-            print(f"[{domain_folder}] Berhasil menambahkan {len(new_valid_records)} materi baru.")
             total_added_global += len(new_valid_records)
+            print(f"[{domain_folder}] Ditambahkan: {len(new_valid_records)} materi.")
 
-        # Update registry status
         registry[domain_folder] = {
             "last_updated": datetime.utcnow().isoformat() + "Z",
-            "total_records": len(existing_hashes)
+            "total_records": existing_records_count + len(new_valid_records)
         }
 
-    # Simpan manifest
     with open(registry_path, "w", encoding="utf-8") as f:
         json.dump(registry, f, indent=2)
 
-    print(f"Selesai! Total record baru global: {total_added_global}")
+    print(f"Pembersihan selesai! Total materi baru: {total_added_global}")
 
 if __name__ == "__main__":
     clean_and_normalize()

@@ -3,6 +3,7 @@ import sys
 import os
 import re
 import sqlite3
+from typing import Tuple, Optional
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DOMAINS_DIR = os.path.join(CURRENT_DIR, "domains")
@@ -15,19 +16,36 @@ def sanitize_domain_name(domain: str) -> str:
     return domain
 
 def check_fts5_support(conn: sqlite3.Connection) -> bool:
-    """Verifikasi apakah SQLite lingkungan saat ini dikompilasi dengan modul FTS5."""
-    try:
-        conn.execute("CREATE VIRTUAL TABLE IF NOT EXISTS _fts5_probe USING fts5(x)")
-        conn.execute("DROP TABLE IF EXISTS _fts5_probe")
-        return True
-    except sqlite3.OperationalError:
-        return False
+    """
+    Verifikasi dukungan FTS5 secara efisien.
+    Hasil di-cache ke tabel sync_meta agar probe table tidak dibuat berulang tiap query.
+    """
+    cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS sync_meta (key TEXT PRIMARY KEY, value TEXT)")
+    cursor.execute("SELECT value FROM sync_meta WHERE key = 'has_fts5'")
+    cached = cursor.fetchone()
+    if cached is not None:
+        return cached[0] == "1"
 
-def init_sqlite_index(domain: str = "01_rag_scraping") -> tuple[sqlite3.Connection, bool]:
+    # Probe pertama kali
+    is_supported = False
+    try:
+        cursor.execute("CREATE VIRTUAL TABLE IF NOT EXISTS _fts5_probe USING fts5(x)")
+        cursor.execute("DROP TABLE IF EXISTS _fts5_probe")
+        is_supported = True
+    except sqlite3.OperationalError:
+        is_supported = False
+
+    cursor.execute("INSERT OR REPLACE INTO sync_meta VALUES ('has_fts5', ?)", ("1" if is_supported else "0",))
+    conn.commit()
+    return is_supported
+
+def init_sqlite_index(domain: str = "01_rag_scraping") -> Tuple[Optional[sqlite3.Connection], bool]:
     """
     Membangun index SQLite.
     Prioritas 1: FTS5 Full-Text Search (O(1) Inverted Index & BM25 ranking).
     Fallback 2: Standard B-Tree SQLite Table (jika FTS5 tidak aktif di environment runner).
+    Kompatibel mundur dari Python 3.8 hingga versi terbaru (typing.Tuple).
     """
     domain = sanitize_domain_name(domain)
     jsonl_path = os.path.join(DOMAINS_DIR, domain, "data", f"{domain}_clean.jsonl")
@@ -40,7 +58,6 @@ def init_sqlite_index(domain: str = "01_rag_scraping") -> tuple[sqlite3.Connecti
 
     has_fts5 = check_fts5_support(conn)
 
-    cursor.execute("CREATE TABLE IF NOT EXISTS sync_meta (key TEXT PRIMARY KEY, value TEXT)")
     cursor.execute("SELECT value FROM sync_meta WHERE key = ?", (f"{domain}_mtime",))
     row = cursor.fetchone()
 

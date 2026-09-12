@@ -45,6 +45,7 @@ jobs:
             domains/${{ matrix.domain }}/raw/
             domains/${{ matrix.domain }}/exploration_history.json
           retention-days: 1
+          if-no-files-found: ignore
 
   # TAHAP 2: Agregasi, Normalisasi Bersih (DATA_CLEANER), dan Single Atomic Git Commit
   # Hanya berjalan setelah SEMUA node matrix harvest selesai

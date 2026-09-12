@@ -142,8 +142,15 @@ Workflow harvester berjalan otomatis setiap 2 jam (`.github/workflows/harvest.ym
 
 ## ➕ Cara Menambahkan Domain Baru
 
-Arsitektur sistem saat ini sepenuhnya *domain-agnostic*. Untuk menambah domain baru:
+Arsitektur sistem saat ini sepenuhnya *domain-agnostic*. Anda dapat menambah domain baru secara otomatis maupun manual:
 
+### Cara Otomatis (Direkomendasikan)
+Gunakan tool CLI scaffolder yang otomatis membuat konfigurasi standar dan mendaftarkannya ke matrix GitHub Actions:
+```bash
+python -m core.add_domain --id 02_smart_contract_exploits --label "Smart Contract Exploits" --threshold 75
+```
+
+### Cara Manual
 1. Buat folder baru di bawah `domains/<domain_id>/` (contoh: `domains/02_smart_contract_exploits/`).
 2. Sediakan `config.json` yang mendeklarasikan:
    - `domain_id`, `domain_label`, dan `accept_threshold`.

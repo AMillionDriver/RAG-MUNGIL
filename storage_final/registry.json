@@ -1,6 +1,16 @@
 {
   "01_rag_scraping": {
-    "last_updated": "2026-09-12T07:28:37.408411Z",
-    "total_records": 19
-  }
+    "last_updated": "2026-09-12T07:27:28.576853Z",
+    "total_records": 15
+  },
+  "hashes": [
+    "98b0e90eb247d40f59d7b5af77ad5e50b1f6ebadb2a8d22a903dcc7e9139430b",
+    "6dfd48e423844964c7e779bd03b3579f56453a7ff74dd53bc8772aa5336a5e58",
+    "2541f7e0159443fc6c030c67c587dabfb69c311bde99090d5cd17d816e4ab408",
+    "569923f4244b952276bf338431929ac7ef04db52ca4dd62c46ebb01ba92945fb",
+    "f53407f460176eeb68f6723c815b3a40c9ca6e0882458e7eff5b9f9eaa330c5f",
+    "5c983dfbf402132e6949a6ccdb599b6faf01c718e2e20726985a415aee20df06"
+  ],
+  "total_records": 6,
+  "last_sync": "2026-09-12T07:41:35.994242Z"
 }

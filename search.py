@@ -14,48 +14,72 @@ def sanitize_domain_name(domain: str) -> str:
         raise ValueError(f"Domain name tidak valid: '{domain}'")
     return domain
 
-def init_sqlite_fts_index(domain: str = "01_rag_scraping") -> sqlite3.Connection:
+def check_fts5_support(conn: sqlite3.Connection) -> bool:
+    """Verifikasi apakah SQLite lingkungan saat ini dikompilasi dengan modul FTS5."""
+    try:
+        conn.execute("CREATE VIRTUAL TABLE IF NOT EXISTS _fts5_probe USING fts5(x)")
+        conn.execute("DROP TABLE IF EXISTS _fts5_probe")
+        return True
+    except sqlite3.OperationalError:
+        return False
+
+def init_sqlite_index(domain: str = "01_rag_scraping") -> tuple[sqlite3.Connection, bool]:
     """
-    Membangun index SQLite Full-Text Search (FTS5) berkecepatan tinggi (BM25 ranking).
-    Pencarian full-text berkecepatan O(1) indeks terbalik, bukan O(N) full-table scan.
+    Membangun index SQLite.
+    Prioritas 1: FTS5 Full-Text Search (O(1) Inverted Index & BM25 ranking).
+    Fallback 2: Standard B-Tree SQLite Table (jika FTS5 tidak aktif di environment runner).
     """
     domain = sanitize_domain_name(domain)
     jsonl_path = os.path.join(DOMAINS_DIR, domain, "data", f"{domain}_clean.jsonl")
     if not os.path.exists(jsonl_path):
-        return None
+        return None, False
 
     os.makedirs(os.path.dirname(CACHE_DB), exist_ok=True)
     conn = sqlite3.connect(CACHE_DB)
     cursor = conn.cursor()
 
-    # Cek sinkronisasi file
+    has_fts5 = check_fts5_support(conn)
+
     cursor.execute("CREATE TABLE IF NOT EXISTS sync_meta (key TEXT PRIMARY KEY, value TEXT)")
     cursor.execute("SELECT value FROM sync_meta WHERE key = ?", (f"{domain}_mtime",))
     row = cursor.fetchone()
 
     current_mtime = str(os.path.getmtime(jsonl_path))
-    table_name = f'"{domain}_fts"'
+    table_raw = f"{domain}_fts" if has_fts5 else f"{domain}_standard"
+    table_quoted = f'"{table_raw}"'
 
-    # Periksa apakah tabel FTS sudah ada
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (f"{domain}_fts",))
-    fts_exists = cursor.fetchone()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_raw,))
+    table_exists = cursor.fetchone()
 
-    if row and row[0] == current_mtime and fts_exists:
-        return conn
+    if row and row[0] == current_mtime and table_exists:
+        return conn, has_fts5
 
-    # Bangun Virtual Table FTS5 untuk pencarian full-text sejati
-    cursor.execute(f"DROP TABLE IF EXISTS {table_name}")
-    cursor.execute(f"""
-        CREATE VIRTUAL TABLE {table_name} USING fts5(
-            id UNINDEXED,
-            title,
-            summary,
-            content,
-            source_url UNINDEXED,
-            metadata_json UNINDEXED,
-            tokenize = 'porter unicode61'
-        )
-    """)
+    # Rebuild / Build Table
+    cursor.execute(f"DROP TABLE IF EXISTS {table_quoted}")
+    if has_fts5:
+        cursor.execute(f"""
+            CREATE VIRTUAL TABLE {table_quoted} USING fts5(
+                id UNINDEXED,
+                title,
+                summary,
+                content,
+                source_url UNINDEXED,
+                metadata_json UNINDEXED,
+                tokenize = 'porter unicode61'
+            )
+        """)
+    else:
+        # Fallback tabel reguler jika modul FTS5 tidak ada di environment
+        cursor.execute(f"""
+            CREATE TABLE {table_quoted} (
+                id TEXT PRIMARY KEY,
+                title TEXT,
+                summary TEXT,
+                content TEXT,
+                source_url TEXT,
+                metadata_json TEXT
+            )
+        """)
 
     records_to_insert = []
     with open(jsonl_path, "r", encoding="utf-8") as f:
@@ -74,55 +98,61 @@ def init_sqlite_fts_index(domain: str = "01_rag_scraping") -> sqlite3.Connection
             ))
 
     cursor.executemany(
-        f"INSERT INTO {table_name} (id, title, summary, content, source_url, metadata_json) VALUES (?, ?, ?, ?, ?, ?)",
+        f"INSERT INTO {table_quoted} (id, title, summary, content, source_url, metadata_json) VALUES (?, ?, ?, ?, ?, ?)",
         records_to_insert
     )
     cursor.execute("INSERT OR REPLACE INTO sync_meta VALUES (?, ?)", (f"{domain}_mtime", current_mtime))
     conn.commit()
-    return conn
+    return conn, has_fts5
 
 def search_rag(query: str, domain: str = "01_rag_scraping", limit: int = 6):
     domain = sanitize_domain_name(domain)
-    conn = init_sqlite_fts_index(domain)
+    conn, has_fts5 = init_sqlite_index(domain)
     if not conn:
         print(f"Data domain '{domain}' belum tersedia.")
         return
 
     cursor = conn.cursor()
-    table_name = f'"{domain}_fts"'
 
-    # Sanitasi query untuk FTS5 query syntax
-    clean_q = re.sub(r'[^\w\s-]', ' ', query).strip()
-    if not clean_q:
-        clean_q = query
-
-    fts_query = ' OR '.join(f'"{token}"' for token in clean_q.split() if len(token) > 1)
-    if not fts_query:
-        fts_query = f'"{clean_q}"'
-
-    try:
-        # Gunakan MATCH dengan FTS5 BM25 relevance ranking
+    if has_fts5:
+        table_quoted = f'"{domain}_fts"'
+        clean_q = re.sub(r'[^\w\s-]', ' ', query).strip()
+        fts_query = ' OR '.join(f'"{token}"' for token in clean_q.split() if len(token) > 1) or f'"{clean_q}"'
+        try:
+            cursor.execute(f"""
+                SELECT id, title, summary, source_url, metadata_json
+                FROM {table_quoted}
+                WHERE {table_quoted} MATCH ?
+                ORDER BY rank
+                LIMIT ?
+            """, (fts_query, limit))
+            rows = cursor.fetchall()
+            engine_name = "FTS5 Inverted Index (BM25)"
+        except sqlite3.OperationalError:
+            cursor.execute(f"""
+                SELECT id, title, summary, source_url, metadata_json
+                FROM {table_quoted}
+                WHERE title LIKE ? OR summary LIKE ?
+                LIMIT ?
+            """, (f"%{query}%", f"%{query}%", limit))
+            rows = cursor.fetchall()
+            engine_name = "FTS5 Substring Fallback"
+    else:
+        # Fallback engine jika SQLite tanpa FTS5
+        table_quoted = f'"{domain}_standard"'
+        search_term = f"%{query}%"
         cursor.execute(f"""
-            SELECT id, title, summary, source_url, metadata_json, rank
-            FROM {table_name}
-            WHERE {table_name} MATCH ?
-            ORDER BY rank
+            SELECT id, title, summary, source_url, metadata_json
+            FROM {table_quoted}
+            WHERE title LIKE ? OR summary LIKE ? OR content LIKE ?
             LIMIT ?
-        """, (fts_query, limit))
+        """, (search_term, search_term, search_term, limit))
         rows = cursor.fetchall()
-    except sqlite3.OperationalError:
-        # Fallback jika sintaks query kompleks
-        cursor.execute(f"""
-            SELECT id, title, summary, source_url, metadata_json, 0 as rank
-            FROM {table_name}
-            WHERE title LIKE ? OR summary LIKE ?
-            LIMIT ?
-        """, (f"%{query}%", f"%{query}%", limit))
-        rows = cursor.fetchall()
+        engine_name = "Standard SQLite Table (FTS5 Unavailable)"
 
-    print(f"\n🔍 Ditemukan {len(rows)} teknik relevan untuk '{query}' (via FTS5 Inverted Index Engine):\n")
+    print(f"\n🔍 Ditemukan {len(rows)} teknik relevan untuk '{query}' (Engine: {engine_name}):\n")
 
-    for idx, (rid, title, summary, source_url, meta_json, rank) in enumerate(rows, 1):
+    for idx, (rid, title, summary, source_url, meta_json) in enumerate(rows, 1):
         meta = json.loads(meta_json) if meta_json else {}
         print(f"{idx}. 📌 {title}")
         print(f"   🔗 Source: {source_url}")

@@ -13,7 +13,9 @@ RAG-MUNGIL/
 │   └── harvest.yml             # Workflow GitHub Actions (Jalan tiap 2 jam otomatis)
 ├── domains/
 │   └── 01_rag_scraping/        # DOMAIN 1: Web Scraping & Stealth Engineering
-│       ├── crawler.py          # Elite Harvester (Curated + Search API)
+│       ├── crawler.py          # Master Orchestrator
+│       ├── explorer.py         # Autonomous Explorer (Dynamic Query + Link Hopper)
+│       ├── judge.py            # Smart Bot Judge (Heuristic Multi-Factor Quality Gate)
 │       └── data/
 │           └── 01_rag_scraping_clean.jsonl   # DATASET GOLD FINAL (Siap pakai untuk Codex/LLM)
 ├── storage_final/
@@ -22,6 +24,18 @@ RAG-MUNGIL/
 ├── search.py                   # Tool CLI pencarian instan untuk IDE Codex / Cursor
 └── requirements.txt
 ```
+
+---
+
+## 🤖 Mekanisme Autonomous Explorer & Smart Judge Bot
+
+1. **Dynamic Query Generator**: Bot mengombinasikan target WAF (*Turnstile, Akamai, DataDome, Kasada, JA4*) dengan tooling (*Camoufox, curl-cffi, Nodriver, CDP*) secara dinamis di setiap siklus.
+2. **Recursive Link Hopper**: Membaca referensi outbound di dalam dokumentasi repositori yang lolos untuk menemukan repositori tersembunyi lainnya secara rekursif.
+3. **Smart Bot Judge Gatekeeper**:
+   - **Skor Kode (+35 poin)**: Wajib memiliki blok kode implementasi nyata.
+   - **Skor Teknikal (+40 poin)**: Mendeteksi terminologi tingkat tinggi (TLS handshake, JA3/JA4, canvas noise, CDP evasion).
+   - **Penalti Spam (-60 poin)**: Otomatis menendang promosi proxy komersial, affiliate link, dan tutorial Hello-World pemula tanpa anti-bot.
+   - **Ambang Batas**: Hanya materi dengan skor $\ge 60$ yang diizinkan masuk ke dataset.
 
 ---
 

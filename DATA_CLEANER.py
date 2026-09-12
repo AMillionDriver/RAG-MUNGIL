@@ -3,12 +3,13 @@ import json
 import re
 import hashlib
 from datetime import datetime
-from typing import Set, List
+from typing import Set, List, Dict
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOMAINS_DIR = os.path.join(BASE_DIR, "domains")
 STORAGE_FINAL = os.path.join(BASE_DIR, "storage_final")
 REGISTRY_FILE = os.path.join(STORAGE_FINAL, "registry.json")
+MAX_HASHES_WINDOW = 5000
 
 def get_content_hash(text: str) -> str:
     # Normalisasi teks: hilangkan spasi berlebih dan case
@@ -27,10 +28,13 @@ def jaccard_similarity(set1: Set[str], set2: Set[str]) -> float:
     union = len(set1.union(set2))
     return intersection / union if union > 0 else 0.0
 
-def load_registry():
+def load_registry() -> dict:
     if os.path.exists(REGISTRY_FILE):
-        with open(REGISTRY_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(REGISTRY_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
     return {
         "domains": {},
         "total_records": 0,
@@ -38,7 +42,7 @@ def load_registry():
         "hashes": []
     }
 
-def save_registry(data):
+def save_registry(data: dict):
     os.makedirs(STORAGE_FINAL, exist_ok=True)
     temp_file = REGISTRY_FILE + ".tmp"
     with open(temp_file, "w", encoding="utf-8") as f:
@@ -53,7 +57,10 @@ def process_domain(domain_name: str, registry: dict) -> int:
 
     clean_file = os.path.join(data_dir, f"{domain_name}_clean.jsonl")
 
-    existing_hashes = set(registry.get("hashes", []))
+    # True FIFO/LRU Structure:
+    # Gunakan Dict keys (Python 3.7+ strictly insertion-ordered) untuk lookup O(1)
+    # sekaligus menjamin urutan kronologis yang akurat (bukan arbitrary set order)
+    ordered_hashes: Dict[str, bool] = {h: True for h in registry.get("hashes", [])}
     existing_token_sets: List[Set[str]] = []
 
     # Baca file clean yang sudah ada jika ada untuk bangun token sets
@@ -82,9 +89,9 @@ def process_domain(domain_name: str, registry: dict) -> int:
             continue
 
         content = data.get("content", "")
-        # 1. Exact Normal Hash
+        # 1. Exact Normal Hash via Insertion-Ordered Dict Lookup
         c_hash = get_content_hash(content)
-        if c_hash in existing_hashes:
+        if c_hash in ordered_hashes:
             os.remove(file_path)
             continue
 
@@ -114,7 +121,8 @@ def process_domain(domain_name: str, registry: dict) -> int:
         }
 
         new_records.append(clean_record)
-        existing_hashes.add(c_hash)
+        # Tambahkan ke dictionary secara berurutan
+        ordered_hashes[c_hash] = True
         existing_token_sets.append(curr_tokens)
         added_count += 1
         os.remove(file_path)
@@ -122,7 +130,6 @@ def process_domain(domain_name: str, registry: dict) -> int:
     # 3. Atomic Append ke file JSONL
     if new_records:
         temp_clean_file = clean_file + ".tmp"
-        # Salin yang lama
         if os.path.exists(clean_file):
             with open(clean_file, "r", encoding="utf-8") as f_in, open(temp_clean_file, "w", encoding="utf-8") as f_out:
                 f_out.write(f_in.read())
@@ -133,8 +140,11 @@ def process_domain(domain_name: str, registry: dict) -> int:
         
         os.replace(temp_clean_file, clean_file)
 
-    # Batasi kapasitas registry hashes (LRU-style cap di 3000 hashes terbaru agar file tidak bengkak)
-    registry["hashes"] = list(existing_hashes)[-3000:]
+    # 4. True LRU Cap:
+    # Karena ordered_hashes adalah dict insertion-ordered, list(ordered_hashes.keys())
+    # menjamin urutan kronologis asli dari data tertua sampai terbaru.
+    all_keys = list(ordered_hashes.keys())
+    registry["hashes"] = all_keys[-MAX_HASHES_WINDOW:]
     return added_count
 
 def main():

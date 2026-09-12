@@ -69,13 +69,35 @@ jobs:
         with:
           path: downloaded-artifacts
 
-      # Susun kembali file raw & history ke folder masing-masing domain
+      # Susun kembali file raw & history ke folder masing-masing domain secara presisi
+      # Menghindari asumsi LCA path upload-artifact@v4
       - name: Reassemble Domain Artifacts
         run: |
           if [ -d "downloaded-artifacts" ]; then
             for artifact_dir in downloaded-artifacts/*; do
-              if [ -d "$artifact_dir/domains" ]; then
-                cp -rf "$artifact_dir/domains/"* domains/ || true
+              if [ -d "$artifact_dir" ]; then
+                folder_name=$(basename "$artifact_dir")
+                # Ekstrak nama domain dari pola 'harvest-data-<domain>'
+                domain_id="${folder_name#harvest-data-}"
+                
+                if [ -n "$domain_id" ] && [ "$domain_id" != "$folder_name" ]; then
+                  echo "📂 Menyusun ulang artefak untuk domain: $domain_id"
+                  mkdir -p "domains/$domain_id/raw"
+                  
+                  # Salin raw JSON files jika ada
+                  if [ -d "$artifact_dir/raw" ]; then
+                    cp -rf "$artifact_dir/raw/"* "domains/$domain_id/raw/" 2>/dev/null || true
+                  elif [ -d "$artifact_dir/domains/$domain_id/raw" ]; then
+                    cp -rf "$artifact_dir/domains/$domain_id/raw/"* "domains/$domain_id/raw/" 2>/dev/null || true
+                  fi
+                  
+                  # Salin exploration_history.json jika ada
+                  if [ -f "$artifact_dir/exploration_history.json" ]; then
+                    cp -f "$artifact_dir/exploration_history.json" "domains/$domain_id/" 2>/dev/null || true
+                  elif [ -f "$artifact_dir/domains/$domain_id/exploration_history.json" ]; then
+                    cp -f "$artifact_dir/domains/$domain_id/exploration_history.json" "domains/$domain_id/" 2>/dev/null || true
+                  fi
+                fi
               fi
             done
           fi

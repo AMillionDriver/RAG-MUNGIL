@@ -214,10 +214,27 @@ class AutonomousExplorer:
         outbound_repos = re.findall(r"github\.com/([a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+)", content)
         probed = 0
         for cand in outbound_repos:
-            cand = cand.rstrip(".git").rstrip("/").split("#")[0]
-            # Lewati tautan akun sendiri atau file static github
-            if any(cand.startswith(x) for x in ["topics/", "features/", "sponsors/", "settings/", "user-attachments/"]):
+            # Benahi pemotongan .git dengan aman
+            cand = cand.split("#")[0].rstrip("/")
+            if cand.endswith(".git"):
+                cand = cand[:-4]
+
+            # Lewati badge/shield, static assets, actions, dan link non-repo
+            IGNORED_PREFIXES = [
+                "topics/", "features/", "sponsors/", "settings/", "user-attachments/",
+                "actions/", "marketplace/", "orgs/", "site/", "explore/", "collections/"
+            ]
+            IGNORED_SUFFIXES = [
+                ".svg", ".png", ".jpg", ".jpeg", ".gif", ".ico", ".badge"
+            ]
+            if any(cand.startswith(x) for x in IGNORED_PREFIXES) or any(cand.endswith(x) for x in IGNORED_SUFFIXES):
                 continue
+
+            # Validasi struktur owner/repo (hanya 2 segmen)
+            parts = cand.split("/")
+            if len(parts) != 2 or not parts[0] or not parts[1]:
+                continue
+
             if cand != repo_full_name and cand not in self.visited_repos and cand not in self.rejected_items:
                 print(f"   ↳ [Link Hopper] Menginvestigasi referensi: {cand}")
                 self.probe_outbound_repo(cand)

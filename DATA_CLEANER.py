@@ -145,24 +145,44 @@ def process_domain(domain_name: str, registry: dict) -> int:
     # menjamin urutan kronologis asli dari data tertua sampai terbaru.
     all_keys = list(ordered_hashes.keys())
     registry["hashes"] = all_keys[-MAX_HASHES_WINDOW:]
-    return added_count
+    return added_count, new_records
 
 def main():
     registry = load_registry()
     total_added = 0
+    summary_new_items = {}
 
     if os.path.exists(DOMAINS_DIR):
         for domain in sorted(os.listdir(DOMAINS_DIR)):
             domain_path = os.path.join(DOMAINS_DIR, domain)
             if os.path.isdir(domain_path) and not domain.startswith("."):
-                added = process_domain(domain, registry)
+                added, domain_new_records = process_domain(domain, registry)
                 if added > 0:
                     print(f"[{domain}] Terverifikasi & Ditambahkan: {added} materi Gold.")
+                    summary_new_items[domain] = [
+                        {
+                            "id": r.get("id"),
+                            "title": r.get("title"),
+                            "source_url": r.get("source_url")
+                        }
+                        for r in domain_new_records
+                    ]
                 total_added += added
 
     registry["total_records"] = registry.get("total_records", 0) + total_added
     registry["last_sync"] = datetime.utcnow().isoformat() + "Z"
     save_registry(registry)
+
+    # Simpan harvest_summary.json untuk notifikasi bot (Telegram / Webhook)
+    summary_payload = {
+        "total_added": total_added,
+        "total_records": registry.get("total_records", 0),
+        "new_items": summary_new_items,
+        "timestamp": registry["last_sync"]
+    }
+    with open("harvest_summary.json", "w", encoding="utf-8") as f:
+        json.dump(summary_payload, f, indent=2)
+
     print(f"Pembersihan selesai! Total materi baru: {total_added}")
 
 if __name__ == "__main__":

@@ -1,0 +1,6 @@
+{
+  "name": "RAG-MUNGIL",
+  "description": "Autonomous Knowledge Harvester & Gold-Tier Scraping RAG Engine with clean JSONL dataset and Codex IDE bridge.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

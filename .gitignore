@@ -6,6 +6,11 @@ __pycache__/
 # Temporary and raw ingestion artifacts
 domains/*/raw/
 *.tmp
+*.db
+*.sqlite
+*.sqlite3
+storage_final/search_cache.db
+harvest_summary.json
 
 
 # Environments

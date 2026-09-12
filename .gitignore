@@ -1,0 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary and raw ingestion artifacts
+domains/*/raw/
+*.tmp
+exploration_history.json
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Node / Web UI build (if any)
+node_modules/
+dist/

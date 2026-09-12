@@ -1,61 +1,162 @@
 # 🏺 RAG-MUNGIL
-> *"Namanya mungil, tapi isinya gold."*
+> *"Autonomous Dataset Harvester for RAG-Ready Technical Corpora"*
 
-Autonomous Knowledge Harvester & RAG Engine yang secara terus-menerus mengumpulkan teknik tingkat tinggi (*Web Scraping, Anti-Bot Bypass, TLS Fingerprinting, Cloudflare/Akamai/Datadome Evasion*) dalam format **Clean JSONL** dengan skema *Fixed Core + Dynamic Metadata*.
+**RAG-MUNGIL** adalah engine harvester dataset otonom yang secara berkala menjelajah internet, mengurasi repositori & diskusi teknis mendalam (*deep technical knowledge*), dan memvalidasi kelayakan konten menggunakan sistem *heuristic multi-factor judge*. 
+
+Dataset yang dihasilkan disimpan dalam format **Clean JSONL** dengan skema *Fixed Core + Dynamic Metadata*, teroptimasi siap konsumsi untuk pipeline **Retrieval-Augmented Generation (RAG)**, LLM Fine-Tuning, atau panduan kontekstual AI Agent (Codex / Cursor / Claude).
 
 ---
 
-## 📂 Struktur Repositori
+## 📊 Status Dataset Saat Ini
+
+| Domain ID | Topik & Cakupan | Total Records | Status Kurasi | File Path |
+| :--- | :--- | :---: | :---: | :--- |
+| `01_rag_scraping` | Web Scraping, TLS/JA4 Evasion, Anti-Bot Bypass | **31** | Gold Tier | `domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl` |
+
+> *Catatan: Total 31 records telah lolos validasi deduplikasi SHA-256 dan fuzzy Jaccard similarity.*
+
+---
+
+## 📂 Arsitektur & Struktur Repositori
 
 ```text
 RAG-MUNGIL/
 ├── .github/workflows/
-│   └── harvest.yml             # Workflow GitHub Actions (Jalan tiap 2 jam otomatis)
-├── domains/
-│   └── 01_rag_scraping/        # DOMAIN 1: Web Scraping & Stealth Engineering
-│       ├── crawler.py          # Master Orchestrator
-│       ├── explorer.py         # Autonomous Explorer (Dynamic Query + Link Hopper)
-│       ├── judge.py            # Smart Bot Judge (Heuristic Multi-Factor Quality Gate)
+│   └── harvest.yml             # 2-Stage CI Pipeline (Paralel Matrix Harvester -> Single Atomic Committer)
+├── core/                       # Core Engines (Domain-Agnostic & Reusable)
+│   ├── crawler_engine.py       # Orchestrator & Pluggable Source Adapters (Seeds, Search, HackerNews)
+│   ├── explorer_engine.py      # Resilient Client, Tree API Source Fetcher, & Recursive Link Hopper
+│   └── judge_engine.py         # Heuristic Judge Bot (Recency, Code Verification, Anti-Spam Gate)
+├── domains/                    # Domain Plugins (Deklaratif)
+│   └── 01_rag_scraping/        # DOMAIN 1: Anti-Bot & Web Scraping Evasion
+│       ├── config.json         # Konfigurasi domain (keywords, weights, signatures, seeds, strategy)
+│       ├── exploration_history.json # Persistent graph traversal memory (visited repos & items)
 │       └── data/
-│           └── 01_rag_scraping_clean.jsonl   # DATASET GOLD FINAL (Siap pakai untuk Codex/LLM)
+│           └── 01_rag_scraping_clean.jsonl # DATASET GOLD FINAL (RAG-Ready JSONL)
 ├── storage_final/
-│   └── registry.json           # Manifest metadata & total record
-├── DATA_CLEANER.py             # Sanitasi terpusat (Deduplikasi SHA-256 & filter noise)
-├── search.py                   # Tool CLI pencarian instan untuk IDE Codex / Cursor
+│   ├── registry.json           # Manifest sinkronisasi & hash fingerprinting
+│   └── search_cache.db         # Cache Inverted Index SQLite FTS5 untuk pencarian instan
+├── DATA_CLEANER.py             # Normalisasi sentral, validasi skema, & deduplikasi konten
+├── search.py                   # Tool CLI pencarian lokal berkecepatan tinggi (FTS5 BM25)
 └── requirements.txt
 ```
 
 ---
 
-## 🤖 Mekanisme Autonomous Explorer & Smart Judge Bot
+## ⚖️ Mekanisme Smart Judge Bot (Quality Gatekeeper)
 
-1. **Dynamic Query Generator**: Bot mengombinasikan target WAF (*Turnstile, Akamai, DataDome, Kasada, JA4*) dengan tooling (*Camoufox, curl-cffi, Nodriver, CDP*) secara dinamis di setiap siklus.
-2. **Recursive Link Hopper**: Membaca referensi outbound di dalam dokumentasi repositori yang lolos untuk menemukan repositori tersembunyi lainnya secara rekursif.
-3. **Smart Bot Judge Gatekeeper**:
-   - **Skor Kode (+35 poin)**: Wajib memiliki blok kode implementasi nyata.
-   - **Skor Teknikal (+40 poin)**: Mendeteksi terminologi tingkat tinggi (TLS handshake, JA3/JA4, canvas noise, CDP evasion).
-   - **Penalti Spam (-60 poin)**: Otomatis menendang promosi proxy komersial, affiliate link, dan tutorial Hello-World pemula tanpa anti-bot.
-   - **Ambang Batas**: Hanya materi dengan skor $\ge 60$ yang diizinkan masuk ke dataset.
+Setiap materi yang ditemukan oleh explorer tidak langsung disimpan, melainkan wajib melalui evaluasi heuristik `SmartJudgeBot` (`core/judge_engine.py`) dengan konfigurasi deklaratif (`config.json`):
+
+1. **Verifikasi Semantik Kode (Cap: 50 poin)**:
+   - Wajib memuat blok kode implementasi nyata (bukan sekadar komentar / *dummy snippet*).
+   - Dihitung $18 \times \text{verified\_blocks}$, dibatasi maksimal **50 poin**.
+2. **Kesesuaian Terminologi Spesifik (Cap: 35 poin)**:
+   - Memeriksa kepadatan kata kunci teknis tingkat tinggi (misal: *TLS handshake, JA3/JA4, CDP evasion, canvas noise*).
+   - Diberi bobot per keyword dan dibatasi maksimal **35 poin**.
+3. **Pemberian Skor Repositori (Stars: hingga +15 poin)**:
+   - Repositori populer ($\ge 500$ stars) mendapat $+15$ poin; *hidden gems* ($\ge 20$ stars) mendapat $+10$ poin.
+4. **Strategi Temporal & Recency (Configurable)**:
+   - **Mode Sensitif Waktu (`recency_sensitive: true`)**: Repositori yang di-update $\le 180$ hari lalu mendapat $+20$ poin. Repositori usang ($> 730$ hari tanpa update) dijatuhi penalti berat **$-40$ poin**.
+   - **Mode Evergreen (`evergreen_bonus: true`)**: Untuk domain fondasional (seperti Exploit, Kriptografi, atau Matematika), materi klasik tidak dipenalti dan justru mendapat apresiasi fondasi.
+5. **Word-Count & Code Tolerance**:
+   - Ambang batas teks minimal (default: 120 kata). Jika teks di bawah kuota namun memuat kode implementasi nyata yang padat, sistem mengaktifkan `code_over_text_tolerance` agar riset ringkas berkualitas tidak terbuang.
+6. **Anti-Spam & Anti-Noob Gatekeeper (Penalti $-70$ poin)**:
+   - Mendeteksi promosi proxy komersial, kode kupon diskon, tautan afiliasi, serta *dummy parser pemula* (misal: `requests.get` tanpa header atau tutorial `quotes.toscrape.com`). Terdeteksi langsung dipotong **$-70$ poin**.
+7. **Ambang Batas Kelulusan (`accept_threshold`)**:
+   - Hanya konten dengan total skor akhir $\ge \mathbf{75}$ poin yang dinyatakan **ACCEPTED** dan diizinkan masuk ke tahap kurasi raw data.
 
 ---
 
-## ⚡ Cara Pakai di IDE (Codex / Cursor / Claude)
+## 📄 Skema Data JSONL (RAG-Ready Standard)
 
-Cukup arahkan instruksi Agent di IDE Anda ke dataset atau gunakan tool pencari:
+Setiap baris di dalam file `.jsonl` memiliki struktur *Fixed Core* yang konsisten dengan *Dynamic Metadata*:
+
+```json
+{
+  "id": "scraping_gh_lexiforest_curl_cffi",
+  "domain": "01_rag_scraping",
+  "title": "Teknik: TLS JA3/JA4 Fingerprint Impersonation & HTTP/2 Bypass",
+  "summary": "Python binding for curl-impersonate fork via cffi. A http client that can impersonate browser tls/ja3/http2 fingerprints.",
+  "content": "### 📦 Source Code Files...\n```python\nfrom curl_cffi import requests\ns = requests.Session(impersonate='chrome124')\n```",
+  "source_url": "https://github.com/lexiforest/curl_cffi",
+  "created_at": "2026-09-12T08:53:50.123456Z",
+  "metadata": {
+    "source_type": "github_repository",
+    "stars": 6485,
+    "repo_name": "lexiforest/curl_cffi",
+    "pushed_at": "2026-04-10T12:00:00Z",
+    "bypassed_wafs": [
+      "Cloudflare",
+      "Akamai",
+      "Datadome",
+      "Kasada",
+      "Incapsula"
+    ],
+    "judge_score": 105,
+    "judge_verdict": "ACCEPTED",
+    "code_snippets_count": 5
+  }
+}
+```
+
+---
+
+## 🔍 Cara Penggunaan di IDE / Agent Workflow
+
+### 1. Pencarian CLI Cepat (FTS5 BM25 Engine)
+Repositori menyediakan skrip `search.py` yang menggunakan SQLite FTS5 *inverted index* untuk pencarian teks instan:
 
 ```bash
-# Cari teknik bypass Cloudflare atau TLS
+# Cari teknik penanganan Cloudflare / Turnstile
 python search.py "cloudflare"
+
+# Cari teknik TLS JA4 Fingerprinting
 python search.py "ja4"
+
+# Cari modul berbasis Camoufox
 python search.py "camoufox"
 ```
 
-Contoh instruksi ke AI Agent Codex:
-> *"Tolong baca `domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl` dan gunakan kode implementasi curl-cffi atau camoufox untuk membuat bot scraper yang lolos Cloudflare Turnstile."*
+### 2. Integrasi dengan Coding Assistant (Cursor / Claude / Copilot)
+Arahkan AI coding assistant ke file dataset:
+> *"Tolong baca file `domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl` dan implementasikan HTTP client menggunakan curl-cffi dengan peniruan browser Chrome terbaru agar request ini tidak terblokir Cloudflare Challenge."*
 
 ---
 
-## ⚙️ Mekanisme Otomatisasi Cloud
-- **Jadwal**: Workflow GitHub Actions berjalan otomatis tiap 2 jam (`0 */2 * * *`).
-- **Safety**: Dilengkapi `git pull --rebase` untuk mencegah konflik push saat Anda membuka repo dari HP.
-- **Deduplikasi**: Menggunakan SHA-256 fingerprinting di `DATA_CLEANER.py` agar tidak ada data dobel.
+## 🔄 Otomatisasi 2-Stage CI Pipeline (GitHub Actions)
+
+Workflow harvester berjalan otomatis setiap 2 jam (`.github/workflows/harvest.yml`) dengan pola **Fan-Out (Matrix) $\to$ Fan-In (Single Aggregator)**:
+
+1. **Stage 1 (`harvest-matrix`)**:
+   - Setiap domain berjalan secara terisolasi pada worker matrix paralel.
+   - Menggunakan token terisolasi (hanya dikirim ke `github.com`, bebas kebocoran ke pihak ketiga).
+   - Tidak melakukan operasi Git Push untuk mengeliminasi potensi *concurrency race condition*.
+   - Mengunggah raw JSON dan `exploration_history.json` sebagai artefak sementara.
+2. **Stage 2 (`aggregate-and-commit`)**:
+   - Berjalan setelah seluruh worker matrix selesai.
+   - Mengunduh dan menyusun ulang seluruh artefak per domain berdasarkan ID domain.
+   - Menjalankan `DATA_CLEANER.py` untuk sanitasi, validasi schema, dan deduplikasi terpusat.
+   - Melakukan **Single Atomic Commit & Push** ke branch utama dengan pertahanan *3x retry loop + rebase*.
+
+---
+
+## ➕ Cara Menambahkan Domain Baru
+
+Arsitektur sistem saat ini sepenuhnya *domain-agnostic*. Untuk menambah domain baru:
+
+1. Buat folder baru di bawah `domains/<domain_id>/` (contoh: `domains/02_smart_contract_exploits/`).
+2. Sediakan `config.json` yang mendeklarasikan:
+   - `domain_id`, `domain_label`, dan `accept_threshold`.
+   - `scoring_strategy` (`recency_sensitive`, `evergreen_bonus`).
+   - `ingestion_targets` (pola glob file kode sumber: misal `["*.t.sol", "*.sol"]`).
+   - `enabled_sources` (`github_seeds`, `github_search`, `hackernews`).
+   - `technical_keywords`, `actionable_code_signatures`, dan `spam_patterns`.
+3. Daftarkan `domain_id` baru tersebut ke dalam matriks `.github/workflows/harvest.yml`:
+   ```yaml
+   strategy:
+     matrix:
+       domain:
+         - 01_rag_scraping
+         - 02_smart_contract_exploits
+   ```
+Engine harvester akan otomatis mengeksekusi proses kurasi untuk domain baru tersebut secara paralel dan teratur!

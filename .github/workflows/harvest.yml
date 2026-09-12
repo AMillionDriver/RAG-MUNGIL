@@ -6,16 +6,21 @@ on:
     - cron: '0 */2 * * *'
   workflow_dispatch: # Tombol manual trigger dari HP
 
-# Concurrency Guard: Mencegah race condition jika run sebelumnya masih berjalan
 concurrency:
   group: rag-mungil-harvest
   cancel-in-progress: false
 
 jobs:
-  harvest-and-clean:
+  harvest-matrix:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        domain:
+          - 01_rag_scraping
 
     steps:
       - name: Checkout Repository
@@ -26,11 +31,11 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Run Crawler (Scraping Domain)
+      - name: Harvest Domain (${{ matrix.domain }})
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python domains/01_rag_scraping/crawler.py
+          python -m core.crawler_engine --domain ${{ matrix.domain }}
 
       - name: Run Data Cleaner & Normalizer
         run: |

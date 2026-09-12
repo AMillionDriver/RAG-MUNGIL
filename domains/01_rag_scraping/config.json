@@ -1,0 +1,157 @@
+{
+  "domain_id": "01_rag_scraping",
+  "domain_label": "Anti-Bot & Web Scraping Evasion",
+  "accept_threshold": 75,
+  "seeds": [
+    {
+      "repo": "lexiforest/curl_cffi",
+      "topic": "TLS JA3/JA4 Fingerprint Impersonation & HTTP/2 Bypass"
+    },
+    {
+      "repo": "bogdanfinn/tls-client",
+      "topic": "High-Performance TLS Evasion Client"
+    },
+    {
+      "repo": "lwthiker/curl-impersonate",
+      "topic": "Engine C/C++ Level TLS Handshake Camouflage"
+    },
+    {
+      "repo": "daijro/camoufox",
+      "topic": "Firefox C++ Source-Level Anti-Detect Browser"
+    },
+    {
+      "repo": "kaliiiiiiiiii/Selenium-Stealth",
+      "topic": "Chrome DevTools Protocol (CDP) Masking"
+    },
+    {
+      "repo": "berstend/puppeteer-extra",
+      "topic": "Puppeteer Stealth Plugin Architecture"
+    },
+    {
+      "repo": "ultrafunkamsterdam/nodriver",
+      "topic": "Asynchronous CDP Native Browser Without Webdriver"
+    },
+    {
+      "repo": "goflyway/goproxy",
+      "topic": "Tunneling & Traffic Mutation Patterns"
+    },
+    {
+      "repo": "gcode-de/drissionpage",
+      "topic": "Dual-Drive Web Control (DOM + Network Packet Sniffing)"
+    }
+  ],
+  "stratified_query_templates": [
+    "\"{waf}\" \"{tool}\" pushed:>2024-01-01",
+    "\"{waf}\" bypass python stars:5..800",
+    "\"{tool}\" anti-detect stars:10..1500",
+    "\"ja4\" fingerprint bypass python",
+    "\"camoufox\" turnstile OR datadome",
+    "\"curl-cffi\" impersonate cloudflare",
+    "\"cdp\" undetected bypass python",
+    "\"nodriver\" cloudflare bypass"
+  ],
+  "template_variables": {
+    "waf": [
+      "turnstile",
+      "datadome",
+      "akamai",
+      "kasada",
+      "perimeterx",
+      "cloudflare challenge"
+    ],
+    "tool": [
+      "camoufox",
+      "curl-cffi",
+      "tls-client",
+      "playwright-stealth",
+      "nodriver",
+      "drissionpage"
+    ]
+  },
+  "hn_queries": [
+    "anti-bot bypass",
+    "cloudflare turnstile bypass",
+    "browser fingerprinting ja4",
+    "web scraping cdp"
+  ],
+  "target_waf_tags": [
+    "cloudflare",
+    "akamai",
+    "datadome",
+    "perimeterx",
+    "kasada",
+    "incapsula",
+    "turnstile",
+    "recaptcha"
+  ],
+  "actionable_code_signatures": [
+    "curl_cffi",
+    "impersonate\\s*=",
+    "tls_client",
+    "camoufox",
+    "selenium_stealth",
+    "stealth\\(",
+    "nodriver",
+    "drissionpage",
+    "undetected_chromedriver",
+    "cdp\\.",
+    "chrome_options\\.add_argument",
+    "puppeteer-extra-plugin-stealth",
+    "playwright_stealth",
+    "ja3",
+    "ja4",
+    "ssl_context",
+    "ciphers\\s*=",
+    "turnstile",
+    "navigator\\.webdriver",
+    "user-agent",
+    "bypass",
+    "datadome"
+  ],
+  "dummy_code_patterns": [
+    "requests\\.get\\(['\"][^'\"]+['\"]\\)\\s*$",
+    "BeautifulSoup\\([^,]+,\\s*['\"]html\\.parser['\"]\\)",
+    "quotes\\.toscrape\\.com",
+    "books\\.toscrape\\.com"
+  ],
+  "technical_keywords": {
+    "ja3": 15,
+    "ja4": 15,
+    "tls fingerprint": 15,
+    "handshake": 10,
+    "cipher suite": 12,
+    "alpn": 10,
+    "http/2": 8,
+    "impersonate": 12,
+    "cdp": 12,
+    "devtools protocol": 12,
+    "canvas noise": 12,
+    "webgl fingerprint": 12,
+    "audiobuffer": 10,
+    "navigator.webdriver": 15,
+    "stealth": 10,
+    "camoufox": 15,
+    "nodriver": 12,
+    "drissionpage": 12,
+    "anti-detect": 12,
+    "turnstile": 15,
+    "cloudflare challenge": 15,
+    "datadome": 15,
+    "akamai bot manager": 15,
+    "kasada": 15,
+    "perimeterx": 15,
+    "browser fingerprinting": 10,
+    "waf bypass": 12
+  },
+  "spam_patterns": [
+    "buy\\s+(?:cheap|residential|mobile|datacenter)\\s+prox(?:y|ies)",
+    "coupon\\s+code",
+    "discount\\s+\\d+%",
+    "promo\\s+code",
+    "pricing\\s+starts\\s+at\\s+\\$",
+    "sign\\s+up\\s+for\\s+(?:our|a)\\s+free\\s+trial",
+    "best\\s+proxy\\s+provider\\s+of\\s+202",
+    "affiliate\\s+link",
+    "order\\s+now"
+  ]
+}

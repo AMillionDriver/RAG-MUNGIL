@@ -1,0 +1,35 @@
+{
+  "visited_repos": [
+    "Edioff/oreillyauto-scraper",
+    "Edioff/akamai-analysis",
+    "yfedoseev/browser_oxide",
+    "lexiforest/curl_cffi",
+    "berstend/puppeteer-extra",
+    "lexiforest/curl-impersonate",
+    "lexiforest/brimp",
+    "lexiforest/impers",
+    "SandiRidwan/akamai-nudata-bypass-adobe"
+  ],
+  "visited_articles": [
+    "45339216",
+    "38715718",
+    "28949443",
+    "46979156",
+    "47853036",
+    "42817439",
+    "41671378",
+    "29048458",
+    "46908355",
+    "42193973",
+    "29042791",
+    "37092288"
+  ],
+  "rejected": [
+    "alrra/browser-logos",
+    "daijro/camoufox",
+    "lorien/grab",
+    "puppeteer/puppeteer",
+    "bogdanfinn/tls-client",
+    "pi0trdotsys/Intercity-Sniffer"
+  ]
+}

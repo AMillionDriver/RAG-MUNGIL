@@ -2,6 +2,22 @@
   "domain_id": "01_rag_scraping",
   "domain_label": "Anti-Bot & Web Scraping Evasion",
   "accept_threshold": 75,
+  "min_word_count": 120,
+  "code_over_text_tolerance": true,
+  "scoring_strategy": {
+    "recency_sensitive": true,
+    "evergreen_bonus": false
+  },
+  "ingestion_targets": {
+    "primary": "README.md",
+    "source_file_patterns": [],
+    "max_source_files": 0
+  },
+  "enabled_sources": [
+    "github_seeds",
+    "github_search",
+    "hackernews"
+  ],
   "seeds": [
     {
       "repo": "lexiforest/curl_cffi",

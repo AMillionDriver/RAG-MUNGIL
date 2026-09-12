@@ -121,3 +121,12 @@ jobs:
               git pull --rebase origin main && git push origin main && break || sleep 5
             done
           fi
+
+      - name: Send Telegram Notification
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python core/notifier.py
+

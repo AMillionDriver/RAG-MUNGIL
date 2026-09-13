@@ -1,14 +1,24 @@
 import { useEffect, useState } from 'react';
-import { Github, ExternalLink, Cpu, FolderGit2, LibraryBig } from 'lucide-react';
+import { Github, ExternalLink, Cpu, FolderGit2, LibraryBig, ShieldCheck, Lock } from 'lucide-react';
 import { loadRagDataset, timeAgo, type RagRecord, type DomainStatus } from './lib/ragData';
 import DatasetViewer from './components/DatasetViewer';
 import CodexBridgeGuide from './components/CodexBridgeGuide';
 import GitHubWorkflowStatus from './components/GitHubWorkflowStatus';
+import TurnstileGateway from './components/TurnstileGateway';
+
+const TURNSTILE_SITE_KEY = '0x4AAAAAADu46RXWxLxLRnbN';
 
 type ActiveTab = 'catalog' | 'codex' | 'workflow';
 type LoadState = 'loading' | 'ready' | 'error';
 
 export default function App() {
+  const [isVerified, setIsVerified] = useState<boolean>(() => {
+    return !!sessionStorage.getItem('cf_turnstile_token');
+  });
+  const [rayId, setRayId] = useState<string>(() => {
+    return sessionStorage.getItem('cf_ray_id') || '';
+  });
+
   const [activeTab, setActiveTab] = useState<ActiveTab>('catalog');
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [errorMessage, setErrorMessage] = useState('');
@@ -38,14 +48,26 @@ export default function App() {
 
     run();
     return () => { cancelled = true; };
-  }, []);
+  }, [isVerified]);
+
+  if (!isVerified) {
+    return (
+      <TurnstileGateway
+        siteKey={TURNSTILE_SITE_KEY}
+        onVerified={(_token, newRayId) => {
+          setIsVerified(true);
+          setRayId(newRayId);
+        }}
+      />
+    );
+  }
 
   const visibleRecords =
     selectedDomain === 'ALL' ? records : records.filter((r) => r.domain === selectedDomain);
 
   return (
     <div className="min-h-screen bg-ink-900 text-paper font-sans flex flex-col">
-      {/* Header — tipis, bukan hero besar dengan glow dekoratif */}
+      {/* Header — tipis, dilengkapi Ray ID & Status Turnstile */}
       <header className="border-b border-ink-600 px-5 py-3.5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
           <span className="text-lg leading-none">🏺</span>
@@ -54,16 +76,41 @@ export default function App() {
             <p className="text-[11px] text-paper-dim leading-tight mt-0.5">Katalog spesimen hasil galian otomatis</p>
           </div>
         </div>
-        <a
-          href="https://github.com/AMillionDriver/RAG-MUNGIL"
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-1.5 text-[12px] text-paper-dim hover:text-paper transition-colors"
-        >
-          <Github className="w-3.5 h-3.5" />
-          <span>Repositori</span>
-          <ExternalLink className="w-3 h-3" />
-        </a>
+
+        <div className="flex items-center gap-3">
+          {/* Badge Cloudflare Turnstile & Ray ID */}
+          <div className="hidden sm:flex items-center gap-2 text-[11px] font-mono bg-ink-950 border border-ink-700 px-2.5 py-1 rounded text-paper-dim">
+            <span className="flex items-center gap-1 text-verdigris">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Turnstile Verified</span>
+            </span>
+            <span className="text-ink-600">|</span>
+            <span className="text-paper select-all" title="Cloudflare Ray ID">
+              Ray: {rayId || 'CGK-Edge'}
+            </span>
+            <button
+              onClick={() => {
+                sessionStorage.removeItem('cf_turnstile_token');
+                setIsVerified(false);
+              }}
+              title="Kunci ulang sesi gateway"
+              className="ml-1 text-paper-dim hover:text-oxide transition-colors"
+            >
+              <Lock className="w-3 h-3" />
+            </button>
+          </div>
+
+          <a
+            href="https://github.com/AMillionDriver/RAG-MUNGIL"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1.5 text-[12px] text-paper-dim hover:text-paper transition-colors"
+          >
+            <Github className="w-3.5 h-3.5" />
+            <span>Repositori</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
       </header>
 
       {/* Nav tab sederhana, garis bawah bukan pill rounded */}

@@ -51,6 +51,9 @@ const RAW_BASE = 'https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/ma
 const DOMAIN_LABELS: Record<string, string> = {
   '01_rag_scraping': 'Scraping & Anti-Bot Evasion',
   '02_web3_smart_contract': 'Web3 & Smart Contract Security',
+  '03_ai_agent_security': 'AI Agent Security & Guardrails',
+  '04_vulnerability_research': 'Software Security & RCA',
+  '05_cloud_devsecops': 'Cloud Security & DevSecOps',
 };
 
 function humanizeDomainId(id: string): string {

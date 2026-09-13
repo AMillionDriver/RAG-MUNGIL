@@ -27,6 +27,13 @@ class SmartJudgeBot:
         self.dummy_patterns: List[str] = config.get("dummy_code_patterns", [])
         self.spam_patterns: List[str] = config.get("spam_patterns", [])
 
+        # Sumber yang direputasi: org/akun yang udah terbukti track record-nya di
+        # bidang ini (firma audit, maintainer tool standar industri, dst). Disimpan
+        # lowercase biar matching-nya case-insensitive terhadap owner.login GitHub.
+        trusted_orgs = config.get("trusted_orgs", [])
+        trusted_authors = config.get("trusted_authors", [])
+        self.trusted_sources: set = {s.lower() for s in (trusted_orgs + trusted_authors)}
+
     def evaluate(self, title: str, content: str, metadata: Optional[Dict[str, Any]] = None) -> Tuple[bool, int, List[str]]:
         if metadata is None:
             metadata = {}
@@ -141,6 +148,16 @@ class SmartJudgeBot:
             reasons.append(f"Hidden gem / Repositori berkembang ({stars} stars) (+10)")
         elif stars >= 5:
             score += 5
+
+        # 6b. Bonus Reputasi Sumber — org/akun dari daftar trusted_orgs/trusted_authors
+        # domain ini dapet bonus terpisah dari bintang. Alasannya: repo BARU dari
+        # firma/maintainer bereputasi (misal PoC baru dari Trail of Bits) wajar masih
+        # sepi bintang, tapi track record sumbernya sendiri udah teruji — jangan
+        # sampai keganjel threshold cuma karena kontennya baru dipublish.
+        repo_owner = metadata.get("repo_owner", "").lower()
+        if repo_owner and repo_owner in self.trusted_sources:
+            score += 20
+            reasons.append(f"Sumber bereputasi terverifikasi ({metadata.get('repo_owner')}) (+20)")
 
         is_accepted = score >= self.accept_threshold
         status_label = "DITERIMA" if is_accepted else "DITOLAK"

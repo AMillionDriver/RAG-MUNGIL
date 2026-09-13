@@ -21,6 +21,7 @@
   "enabled_sources": [
     "github_seeds",
     "github_search",
+    "github_org_search",
     "hackernews"
   ],
   "seeds": [
@@ -137,5 +138,11 @@
     "discount\\s+\\d+%",
     "promo\\s+code",
     "affiliate\\s+link"
+  ],
+  "trusted_orgs": [
+    "aquasecurity",
+    "prowler-cloud",
+    "falcosecurity",
+    "kubernetes"
   ]
 }

@@ -20,6 +20,7 @@
   "enabled_sources": [
     "github_seeds",
     "github_search",
+    "github_org_search",
     "hackernews"
   ],
   "seeds": [
@@ -165,5 +166,13 @@
     "join\\s+our\\s+telegram\\s+for\\s+signals",
     "100x\\s+gem",
     "pump\\s+and\\s+dump"
+  ],
+  "trusted_orgs": [
+    "OpenZeppelin",
+    "trailofbits",
+    "crytic",
+    "code-423n4",
+    "sherlock-audit",
+    "foundry-rs"
   ]
 }

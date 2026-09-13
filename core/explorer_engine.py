@@ -217,6 +217,7 @@ class AutonomousExplorer:
         metadata = {
             "stars": stars,
             "repo_name": repo_full_name,
+            "repo_owner": repo_full_name.split("/")[0] if "/" in repo_full_name else "",
             "pushed_at": pushed_at
         }
 
@@ -256,6 +257,7 @@ class AutonomousExplorer:
                 "source_type": "github_repository",
                 "stars": stars,
                 "repo_name": repo_full_name,
+                "repo_owner": repo_full_name.split("/")[0] if "/" in repo_full_name else "",
                 "pushed_at": pushed_at,
                 "bypassed_wafs": matched_tags or [f"{self.config.get('domain_label', 'Teknik')} Implementasi"],
                 "judge_score": score,
@@ -304,8 +306,15 @@ class AutonomousExplorer:
         if res and res[0] == 200:
             try:
                 data = json.loads(res[1])
+                # Kalau ini fork, proses repo ASLI-nya (parent), bukan hasil clone-nya.
+                # Data parent udah nempel di response ini (gratis, gak nambah API call),
+                # jadi tinggal redirect tanpa biaya quota tambahan.
+                if data.get("fork") and data.get("parent"):
+                    parent = data["parent"]
+                    print(f"   ↳ [Fork Resolved] {repo_name} -> {parent.get('full_name')} (repo asli)")
+                    data = parent
                 self.process_github_repo(
-                    repo_full_name=repo_name,
+                    repo_full_name=data.get("full_name", repo_name),
                     desc=data.get("description", ""),
                     html_url=data.get("html_url", f"https://github.com/{repo_name}"),
                     stars=data.get("stargazers_count", 0),
@@ -326,6 +335,12 @@ class AutonomousExplorer:
             try:
                 items = json.loads(res[1]).get("items", [])
                 for it in items:
+                    # Item hasil search cuma punya boolean fork, gak ada objek parent
+                    # (butuh 1 API call tambahan buat itu). Daripada boros quota,
+                    # fork langsung di-skip aja -- yang asli kemungkinan besar udah/akan
+                    # ketemu lewat query lain atau Link Hopper.
+                    if it.get("fork"):
+                        continue
                     self.process_github_repo(
                         repo_full_name=it.get("full_name"),
                         desc=it.get("description", ""),
@@ -336,6 +351,32 @@ class AutonomousExplorer:
                     )
             except Exception as e:
                 print(f"Error parse search query '{q}': {e}")
+
+    def explore_github_org_search(self, orgs: List[str]):
+        """Nyari LANGSUNG di dalam org/akun bereputasi pakai qualifier org:,
+        bukan nebak lewat keyword bebas kayak explore_github_search()."""
+        print("\n--- [Eksplorasi Org/Author Bereputasi] ---")
+        for org in orgs:
+            encoded_q = urllib.parse.quote(f"org:{org}")
+            url = f"https://api.github.com/search/repositories?q={encoded_q}&sort=updated&order=desc&per_page=5"
+            res = self.http.get(url)
+            if not res or res[0] != 200:
+                continue
+            try:
+                items = json.loads(res[1]).get("items", [])
+                for it in items:
+                    if it.get("fork"):
+                        continue
+                    self.process_github_repo(
+                        repo_full_name=it.get("full_name"),
+                        desc=it.get("description", ""),
+                        html_url=it.get("html_url"),
+                        stars=it.get("stargazers_count", 0),
+                        default_branch=it.get("default_branch", "main"),
+                        pushed_at=it.get("pushed_at", "")
+                    )
+            except Exception as e:
+                print(f"Error parse org search '{org}': {e}")
 
     def explore_hackernews(self):
         hn_queries = self.config.get("hn_queries", [])

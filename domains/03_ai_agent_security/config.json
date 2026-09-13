@@ -20,6 +20,7 @@
   "enabled_sources": [
     "github_seeds",
     "github_search",
+    "github_org_search",
     "hackernews"
   ],
   "seeds": [
@@ -157,5 +158,11 @@
     "promo\\s+code",
     "affiliate\\s+link",
     "sign\\s+up\\s+for\\s+free\\s+credits"
+  ],
+  "trusted_orgs": [
+    "NVIDIA",
+    "Azure",
+    "promptfoo",
+    "OWASP"
   ]
 }

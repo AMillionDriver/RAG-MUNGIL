@@ -16,6 +16,7 @@
   "enabled_sources": [
     "github_seeds",
     "github_search",
+    "github_org_search",
     "hackernews"
   ],
   "seeds": [
@@ -169,5 +170,15 @@
     "best\\s+proxy\\s+provider\\s+of\\s+202",
     "affiliate\\s+link",
     "order\\s+now"
+  ],
+  "trusted_orgs": [
+    "scrapfly"
+  ],
+  "trusted_authors": [
+    "lexiforest",
+    "bogdanfinn",
+    "daijro",
+    "Hyper-Solutions",
+    "CloakHQ"
   ]
 }

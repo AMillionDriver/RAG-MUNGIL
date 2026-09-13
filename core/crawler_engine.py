@@ -48,6 +48,14 @@ def run_github_search_adapter(explorer: AutonomousExplorer, http: ResilientHttpC
     print(f"Queries siklus ini: {stratified_queries}")
     explorer.explore_github_search(stratified_queries)
 
+def run_github_org_search_adapter(explorer: AutonomousExplorer, http: ResilientHttpClient, config: Dict[str, Any]):
+    orgs = config.get("trusted_orgs", []) + config.get("trusted_authors", [])
+    if not orgs:
+        return
+    print("\n--- [Source Adapter: Org/Author Bereputasi] ---")
+    print(f"Menyisir repo terbaru dari: {orgs}")
+    explorer.explore_github_org_search(orgs)
+
 def run_hackernews_adapter(explorer: AutonomousExplorer, http: ResilientHttpClient, config: Dict[str, Any]):
     hn_queries = config.get("hn_queries", [])
     if not hn_queries:
@@ -58,6 +66,7 @@ def run_hackernews_adapter(explorer: AutonomousExplorer, http: ResilientHttpClie
 SOURCE_ADAPTER_REGISTRY = {
     "github_seeds": run_github_seeds_adapter,
     "github_search": run_github_search_adapter,
+    "github_org_search": run_github_org_search_adapter,
     "hackernews": run_hackernews_adapter
 }
 

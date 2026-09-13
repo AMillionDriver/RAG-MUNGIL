@@ -6,7 +6,7 @@ import CodexBridgeGuide from './components/CodexBridgeGuide';
 import GitHubWorkflowStatus from './components/GitHubWorkflowStatus';
 import TurnstileGateway from './components/TurnstileGateway';
 
-const TURNSTILE_SITE_KEY = '0x4AAAAAADu46RXWxLxLRnbN';
+const TURNSTILE_SITE_KEY = '0x4AAAAAADu5H6mpeAoSKieA';
 
 type ActiveTab = 'catalog' | 'codex' | 'workflow';
 type LoadState = 'loading' | 'ready' | 'error';

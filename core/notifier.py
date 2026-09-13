@@ -22,7 +22,12 @@ from typing import Dict, List, Any
 def send_telegram_notification(summary_file: str = "harvest_summary.json") -> None:
     bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
     chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
-    commit_sha = os.environ.get("GITHUB_SHA", "")[:7]
+    # Prioritaskan FRESH_COMMIT_SHA (SHA commit yang baru saja dibuat job ini
+    # sendiri, lihat workflow step "Single Atomic Commit & Push"). GITHUB_SHA
+    # bawaan Actions cuma nunjuk commit yang men-trigger run ini dan sudah
+    # basi begitu job ini bikin commit baru — dipakai sebagai fallback saja
+    # untuk siklus yang memang tidak menghasilkan commit baru.
+    commit_sha = (os.environ.get("FRESH_COMMIT_SHA") or os.environ.get("GITHUB_SHA", ""))[:7]
     repo_name = os.environ.get("GITHUB_REPOSITORY", "AMillionDriver/RAG-MUNGIL")
 
     if not bot_token or not chat_id:

@@ -124,6 +124,13 @@ jobs:
             for i in {1..3}; do
               git pull --rebase origin main && git push origin main && break || sleep 5
             done
+            # GITHUB_SHA bawaan Actions itu SHA commit yang MEN-TRIGGER run ini,
+            # nilainya beku sejak awal job dan TIDAK ikut ter-update walau job
+            # ini sendiri baru saja membuat commit baru di atas. Tangkap SHA
+            # commit yang beneran baru dibuat di sini, taruh di $GITHUB_ENV
+            # supaya step berikutnya (notifier.py) bisa pakai SHA yang benar,
+            # bukan SHA commit sebelumnya.
+            echo "FRESH_COMMIT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           fi
 
       - name: Send Telegram Notification
@@ -131,6 +138,8 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          FRESH_COMMIT_SHA: ${{ env.FRESH_COMMIT_SHA }}
         run: |
           python core/notifier.py
+
 

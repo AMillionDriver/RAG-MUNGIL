@@ -1,0 +1,52 @@
+{
+  "visited_repos": [
+    "aquasecurity/setup-trivy",
+    "aquasecurity/trivy-action",
+    "aquasecurity/trivy-db",
+    "aquasecurity/trivy",
+    "aquasecurity/kube-bench",
+    "King-Wealth247/Automated-DevSecOps-Security-Gate",
+    "bridgecrewio/checkov",
+    "prowler-cloud/prowler",
+    "aquasecurity/trivy-operator",
+    "Sascha-cl/devsecops-pipeline-lab",
+    "aquasecurity/trivy-java-db"
+  ],
+  "visited_articles": [
+    "28476513",
+    "46376233",
+    "42273587",
+    "35440736",
+    "40786971",
+    "40307983",
+    "43763633",
+    "47280602",
+    "43129301",
+    "39842792",
+    "23104411",
+    "29499425",
+    "43974991",
+    "45438318",
+    "43844665"
+  ],
+  "rejected": [
+    "trufflesecurity/trufflehog",
+    "nccgroup/ScoutSuite",
+    "aquasecurity/trivy-sarif-demo",
+    "aquasecurity/trivy-checks",
+    "aquasecurity/trivy-vscode-extension",
+    "hadolint/hadolint",
+    "aquasecurity/community",
+    "cisagov/scuba",
+    "dilrajsooch/grantguard",
+    "Tejas-13/aws-iam-privilege-escalation-detection",
+    "famclaw/honeybadger",
+    "gitleaks/gitleaks",
+    "Vinum-Security/yandex-cloud-security",
+    "oras-project/oras",
+    "fabiocicerchia/security-scanner-toolbox",
+    "open-policy-agent/opa",
+    "bimalthanet5/cloud-iam-capstone",
+    "spf13/viper"
+  ]
+}

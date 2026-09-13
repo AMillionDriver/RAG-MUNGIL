@@ -13,12 +13,21 @@ storage_final/search_cache.db
 harvest_summary.json
 
 
-# Environments
+# Environments & Secrets
 .env
+.env.local
+.env.*.local
+.env.development
+.env.production
+!.env.example
 .venv
 env/
 venv/
 ENV/
+
+# Deployment caches
+.vercel
+.turbo
 
 # OS generated files
 .DS_Store

@@ -7,8 +7,8 @@ import GitHubWorkflowStatus from './components/GitHubWorkflowStatus';
 import TurnstileGateway from './components/TurnstileGateway';
 
 const TURNSTILE_KEYS = {
-  invisible: '0x4AAAAAADu5H6mpeAoSKieA',
-  interactive: '0x4AAAAAADu46RXWxLxLRnbN',
+  invisible: (import.meta.env.VITE_TURNSTILE_INVISIBLE_SITE_KEY as string) || '0x4AAAAAADu5H6mpeAoSKieA',
+  interactive: (import.meta.env.VITE_TURNSTILE_INTERACTIVE_SITE_KEY as string) || '0x4AAAAAADu46RXWxLxLRnbN',
 };
 
 type ActiveTab = 'catalog' | 'codex' | 'workflow';

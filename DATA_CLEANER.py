@@ -81,6 +81,21 @@ def process_domain(domain_name: str, registry: dict) -> int:
                     pass
 
     if not os.path.exists(raw_dir):
+        # Tidak ada artifact/raw item siklus ini (bisa karena job matrix domain
+        # ini gagal, atau memang nol kandidat baru sehingga upload-artifact
+        # tidak membuat apa-apa). Registry TETAP harus mencatat domain ini
+        # dengan angka yang akurat dari clean_file yang sudah ada — supaya
+        # frontend (src/lib/ragData.ts) yang menentukan daftar domain dari
+        # Object.keys(registry) tidak diam-diam kehilangan domain yang datanya
+        # sebenarnya masih utuh di disk, hanya karena siklus ini nihil.
+        # last_updated sengaja TIDAK diubah di sini — itu representasi jujur
+        # "kapan domain ini terakhir benar-benar disurvei", bukan basa-basi.
+        if existing_token_sets or domain_name in registry:
+            prev_entry = registry.get(domain_name, {})
+            registry[domain_name] = {
+                "last_updated": prev_entry.get("last_updated"),
+                "total_records": len(existing_token_sets)
+            }
         return 0, []
 
     added_count = 0

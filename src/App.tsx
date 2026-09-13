@@ -18,9 +18,6 @@ export default function App() {
   const [isVerified, setIsVerified] = useState<boolean>(() => {
     return !!sessionStorage.getItem('cf_turnstile_token');
   });
-  const [rayId, setRayId] = useState<string>(() => {
-    return sessionStorage.getItem('cf_ray_id') || '';
-  });
   const [verifiedMode, setVerifiedMode] = useState<'invisible' | 'interactive'>(() => {
     return (sessionStorage.getItem('cf_turnstile_mode') as any) || 'invisible';
   });
@@ -60,9 +57,8 @@ export default function App() {
     return (
       <TurnstileGateway
         keys={TURNSTILE_KEYS}
-        onVerified={(_token, newRayId, mode) => {
+        onVerified={(_token, mode) => {
           setIsVerified(true);
-          setRayId(newRayId);
           setVerifiedMode(mode);
         }}
       />
@@ -85,15 +81,11 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Badge Cloudflare Turnstile & Ray ID */}
+          {/* Badge status Turnstile — cuma info yang beneran nyata, Ray ID palsu dihapus */}
           <div className="hidden sm:flex items-center gap-2 text-[11px] font-mono bg-ink-950 border border-ink-700 px-2.5 py-1 rounded text-paper-dim">
             <span className="flex items-center gap-1 text-verdigris">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Turnstile {verifiedMode === 'invisible' ? 'Auto' : 'Checklist'}</span>
-            </span>
-            <span className="text-ink-600">|</span>
-            <span className="text-paper select-all" title="Cloudflare Ray ID">
-              Ray: {rayId || 'CGK-Edge'}
             </span>
             <button
               onClick={() => {

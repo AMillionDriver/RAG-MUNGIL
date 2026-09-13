@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { ShieldCheck, ShieldAlert, Lock, CheckCircle2, RefreshCw, Terminal, Globe, Cpu, ExternalLink, Shield, ToggleLeft, ToggleRight } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Lock, CheckCircle2, RefreshCw, Cpu, ExternalLink, Shield, ToggleLeft, ToggleRight } from 'lucide-react';
 
 export interface TurnstileKeys {
   invisible: string;
@@ -8,7 +8,7 @@ export interface TurnstileKeys {
 
 interface TurnstileGatewayProps {
   keys: TurnstileKeys;
-  onVerified: (token: string, rayId: string, mode: 'invisible' | 'interactive') => void;
+  onVerified: (token: string, mode: 'invisible' | 'interactive') => void;
 }
 
 declare global {
@@ -36,15 +36,6 @@ declare global {
   }
 }
 
-export function generateRayId(): string {
-  const chars = '0123456789abcdef';
-  let hex = '';
-  for (let i = 0; i < 16; i++) {
-    hex += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return `${hex}-CGK`;
-}
-
 export default function TurnstileGateway({ keys, onVerified }: TurnstileGatewayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
@@ -52,18 +43,6 @@ export default function TurnstileGateway({ keys, onVerified }: TurnstileGatewayP
   const [status, setStatus] = useState<'verifying' | 'success' | 'error' | 'script_loading'>('script_loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [progressPercent, setProgressPercent] = useState<number>(25);
-
-  const [rayId] = useState<string>(() => {
-    const cached = sessionStorage.getItem('cf_ray_id');
-    if (cached) return cached;
-    const newId = generateRayId();
-    sessionStorage.setItem('cf_ray_id', newId);
-    return newId;
-  });
-
-  const [simulatedIp] = useState<string>(() => {
-    return '182.253.' + Math.floor(Math.random() * 200 + 10) + '.' + Math.floor(Math.random() * 200 + 10);
-  });
 
   const currentSiteKey = activeMode === 'invisible' ? keys.invisible : keys.interactive;
 
@@ -98,7 +77,7 @@ export default function TurnstileGateway({ keys, onVerified }: TurnstileGatewayP
           sessionStorage.setItem('cf_turnstile_token', receivedToken);
           sessionStorage.setItem('cf_turnstile_mode', activeMode);
           setTimeout(() => {
-            onVerified(receivedToken, rayId, activeMode);
+            onVerified(receivedToken, activeMode);
           }, 500);
         },
         'error-callback': (err: string) => {
@@ -124,7 +103,7 @@ export default function TurnstileGateway({ keys, onVerified }: TurnstileGatewayP
       setStatus('error');
       setErrorMessage('Gagal memuat widget Cloudflare Turnstile.');
     }
-  }, [activeMode, currentSiteKey, onVerified, rayId]);
+  }, [activeMode, currentSiteKey, onVerified]);
 
   useEffect(() => {
     let checkInterval: any = null;
@@ -308,30 +287,12 @@ export default function TurnstileGateway({ keys, onVerified }: TurnstileGatewayP
           </div>
         )}
 
-        {/* Telemetri Ray ID & WAF Information */}
+        {/* Info gateway — cuma data yang beneran nyata, bukan telemetri hasil karang-karangan */}
         <div className="bg-ink-950 rounded border border-ink-700/80 p-3.5 space-y-2 text-[11px] font-mono text-paper-dim">
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-paper">
-              <Terminal className="w-3 h-3 text-verdigris" />
-              Cloudflare Ray ID:
-            </span>
-            <span className="text-paper font-semibold select-all text-verdigris">
-              {rayId}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between border-t border-ink-800/80 pt-1.5">
-            <span className="flex items-center gap-1.5">
-              <Globe className="w-3 h-3 text-paper-dim" />
-              Client Edge IP:
-            </span>
-            <span>{simulatedIp}</span>
-          </div>
-
-          <div className="flex items-center justify-between border-t border-ink-800/80 pt-1.5">
-            <span className="flex items-center gap-1.5">
-              <Cpu className="w-3 h-3 text-paper-dim" />
-              Active Site Key:
+              <Cpu className="w-3 h-3 text-verdigris" />
+              Site Key Aktif:
             </span>
             <span className="truncate max-w-[190px] text-paper-dim/90" title={currentSiteKey}>
               {currentSiteKey} ({activeMode})
@@ -339,9 +300,9 @@ export default function TurnstileGateway({ keys, onVerified }: TurnstileGatewayP
           </div>
 
           <div className="flex items-center justify-between border-t border-ink-800/80 pt-1.5 text-[10px]">
-            <span>Mekanisme Gateway:</span>
+            <span>Mekanisme gateway:</span>
             <span className="text-verdigris font-semibold">
-              Auto-Adaptive (Invisible → Interactive Fallback)
+              Auto-adaptive (invisible → fallback interaktif)
             </span>
           </div>
         </div>

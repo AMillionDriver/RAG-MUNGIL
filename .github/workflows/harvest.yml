@@ -24,6 +24,7 @@ jobs:
           - 03_ai_agent_security
           - 04_vulnerability_research
           - 05_cloud_devsecops
+          - 06_compiler_errors
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

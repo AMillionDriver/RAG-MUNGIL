@@ -426,6 +426,105 @@ class AutonomousExplorer:
 
                 self.process_web_article(url=link, title=title, published=published_iso, source_domain=source_domain)
 
+    def explore_github_directory_docs(self, targets: List[Dict[str, Any]]):
+        """Sumber referensi terstruktur: 1 file dokumentasi = 1 record, BUKAN
+        digabung jadi satu blob raksasa kayak fetch_source_code_files(). Cocok
+        buat repo yang isinya banyak file kecil independen (kode error compiler,
+        entri glossary, dst) -- pakai Contents API per-folder (bukan recursive
+        tree) biar gak kena truncation walau repo induknya monorepo raksasa
+        kayak rust-lang/rust."""
+        print("\n--- [Source Adapter: Direktori Dokumentasi Terstruktur] ---")
+        for target in targets:
+            repo = target.get("repo", "")
+            path = target.get("path", "")
+            pattern = target.get("pattern", "*.md")
+            batch_limit = target.get("batch_limit", 20)
+
+            url = f"https://api.github.com/repos/{repo}/contents/{path}"
+            res = self.http.get(url)
+            if not res or res[0] != 200:
+                print(f"   ⚠️ Gagal buka direktori: {repo}/{path} (status: {res[0] if res else 'timeout'})")
+                continue
+
+            try:
+                entries = json.loads(res[1])
+            except Exception:
+                continue
+
+            if not isinstance(entries, list):
+                continue
+
+            matched = [e for e in entries if e.get("type") == "file" and fnmatch.fnmatch(e.get("name", ""), pattern)]
+            print(f"   {repo}/{path}: {len(matched)} file cocok pola '{pattern}'")
+
+            processed_this_cycle = 0
+            for entry in matched:
+                file_id = f"{repo}/{path}/{entry['name']}"
+                if file_id in self.visited_articles or file_id in self.rejected_items:
+                    continue
+                if processed_this_cycle >= batch_limit:
+                    break
+
+                download_url = entry.get("download_url")
+                if not download_url:
+                    continue
+                file_res = self.http.get(download_url)
+                if not file_res or file_res[0] != 200:
+                    continue
+
+                self.process_doc_file(
+                    file_id=file_id,
+                    file_name=entry["name"],
+                    content=file_res[1],
+                    source_url=entry.get("html_url", download_url),
+                    source_repo=repo
+                )
+                processed_this_cycle += 1
+
+    def process_doc_file(self, file_id: str, file_name: str, content: str, source_url: str, source_repo: str):
+        if not content.strip():
+            self.rejected_items.add(file_id)
+            return
+
+        title = os.path.splitext(file_name)[0]
+        metadata = {"repo_name": source_repo, "repo_owner": source_repo.split("/")[0] if "/" in source_repo else ""}
+
+        accepted, score, judge_logs = self.judge.evaluate(title=title, content=content, metadata=metadata)
+
+        if not accepted:
+            print(f"⛔ [Judge REJECT] ({score} pts) {file_id} -> {judge_logs[0] if judge_logs else '-'}")
+            self.rejected_items.add(file_id)
+            return
+
+        print(f"✨ [Judge ACCEPT] ({score} pts) {file_id} -> Lolos kurasi Gold!")
+        code_snippets = self.extract_actionable_code_blocks(content)
+
+        record_id = f"{self.domain_id}_doc_{title.replace('/', '_')}"
+        payload = {
+            "id": record_id,
+            "domain": self.domain_id,
+            "title": title,
+            "summary": content.strip().split("\n", 1)[0][:280],
+            "content": content[:18000],
+            "source_url": source_url,
+            "created_at": datetime.utcnow().isoformat() + "Z",
+            "metadata": {
+                "source_type": "reference_doc",
+                "repo_name": source_repo,
+                "repo_owner": source_repo.split("/")[0] if "/" in source_repo else "",
+                "judge_score": score,
+                "judge_verdict": "ACCEPTED",
+                "judge_notes": judge_logs,
+                "code_snippets_count": len(code_snippets),
+                "code_snippets": code_snippets
+            }
+        }
+
+        with open(os.path.join(self.raw_dir, f"{record_id}.json"), "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+
+        self.visited_articles.add(file_id)
+
     def probe_outbound_repo(self, repo_name: str):
         res = self.http.get(f"https://api.github.com/repos/{repo_name}")
         if res and res[0] == 200:

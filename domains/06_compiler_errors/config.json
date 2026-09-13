@@ -1,0 +1,142 @@
+{
+  "domain_id": "06_compiler_errors",
+  "domain_label": "Compiler Error Diagnostics",
+  "accept_threshold": 40,
+  "min_word_count": 30,
+  "code_over_text_tolerance": true,
+  "scoring_strategy": {
+    "recency_sensitive": false,
+    "evergreen_bonus": true
+  },
+  "ingestion_targets": {
+    "source_file_patterns": []
+  },
+  "enabled_sources": [
+    "github_directory_docs",
+    "github_search",
+    "hackernews"
+  ],
+  "seeds": [],
+  "directory_targets": [
+    {
+      "repo": "rust-lang/rust",
+      "path": "compiler/rustc_error_codes/src/error_codes",
+      "pattern": "*.md",
+      "batch_limit": 20
+    }
+  ],
+  "trusted_orgs": [
+    "rust-lang"
+  ],
+  "trusted_authors": [],
+  "stratified_query_templates": [
+    "\"{error}\" fix explanation stars:5..3000",
+    "\"{lang}\" \"{error}\" solved minimal example",
+    "compiler diagnostic \"{error}\" cheat sheet"
+  ],
+  "template_variables": {
+    "error": [
+      "undefined reference to",
+      "borrowed value does not live long enough",
+      "cannot borrow as mutable",
+      "segmentation fault",
+      "null pointer dereference",
+      "type mismatch",
+      "unresolved external symbol",
+      "trait bound not satisfied"
+    ],
+    "lang": [
+      "rust",
+      "c++",
+      "go",
+      "gcc",
+      "clang",
+      "msvc"
+    ]
+  },
+  "hn_queries": [
+    "compiler error",
+    "rust borrow checker",
+    "segfault debugging",
+    "linker error"
+  ],
+  "target_waf_tags": [
+    "Rust",
+    "C++",
+    "Go",
+    "GCC",
+    "Clang",
+    "MSVC",
+    "Java",
+    "C#"
+  ],
+  "actionable_code_signatures": [
+    "fn ",
+    "impl ",
+    "struct ",
+    "enum ",
+    "trait ",
+    "match ",
+    "let ",
+    "error\\[E",
+    "warning:",
+    "undefined reference to",
+    "```rust",
+    "```cpp",
+    "```c",
+    "```go",
+    "cannot borrow",
+    "does not live long enough",
+    "expected type",
+    "found type",
+    "=>",
+    "::",
+    "mod ",
+    "pub "
+  ],
+  "dummy_code_patterns": [
+    "// TODO",
+    "// your code here",
+    "lorem ipsum"
+  ],
+  "technical_keywords": {
+    "borrow checker": 8,
+    "lifetime": 6,
+    "undefined reference": 8,
+    "linker error": 7,
+    "segmentation fault": 7,
+    "null pointer": 6,
+    "use after free": 8,
+    "move semantics": 6,
+    "trait bound": 6,
+    "type mismatch": 5,
+    "template instantiation": 6,
+    "overload resolution": 5,
+    "generic constraint": 5,
+    "unresolved external symbol": 7,
+    "trait": 4,
+    "generic": 4,
+    "enum": 3,
+    "struct": 3,
+    "macro": 4,
+    "module": 3,
+    "pattern matching": 5,
+    "ownership": 6,
+    "mutability": 4,
+    "recursion": 4,
+    "closure": 4,
+    "reference": 3,
+    "dereference": 4,
+    "type inference": 5,
+    "coercion": 4,
+    "visibility": 3,
+    "associated type": 5
+  },
+  "spam_patterns": [
+    "subscribe now",
+    "buy now",
+    "limited offer",
+    "click here",
+    "as an ai language model"
+  ]
+}

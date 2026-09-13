@@ -62,6 +62,12 @@ def run_rss_feeds_adapter(explorer: AutonomousExplorer, http: ResilientHttpClien
         return
     explorer.explore_rss_feeds(feeds)
 
+def run_github_directory_docs_adapter(explorer: AutonomousExplorer, http: ResilientHttpClient, config: Dict[str, Any]):
+    targets = config.get("directory_targets", [])
+    if not targets:
+        return
+    explorer.explore_github_directory_docs(targets)
+
 def run_hackernews_adapter(explorer: AutonomousExplorer, http: ResilientHttpClient, config: Dict[str, Any]):
     hn_queries = config.get("hn_queries", [])
     if not hn_queries:
@@ -74,6 +80,7 @@ SOURCE_ADAPTER_REGISTRY = {
     "github_search": run_github_search_adapter,
     "github_org_search": run_github_org_search_adapter,
     "rss_feeds": run_rss_feeds_adapter,
+    "github_directory_docs": run_github_directory_docs_adapter,
     "hackernews": run_hackernews_adapter
 }
 

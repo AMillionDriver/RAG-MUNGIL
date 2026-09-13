@@ -17,6 +17,27 @@ STORAGE_FINAL = os.path.join(BASE_DIR, "storage_final")
 REGISTRY_FILE = os.path.join(STORAGE_FINAL, "registry.json")
 MAX_HASHES_WINDOW = 5000
 
+# Peta source_type -> content_tier. source_type udah nempel di metadata SETIAP
+# record sejak awal (lihat explorer_engine.py: github_repository, web_article,
+# reference_doc, hackernews_discussion) -- jadi tier bisa diturunin langsung
+# dari situ, gak perlu sinyal baru atau kerjaan manual per domain. Domain yang
+# emang gak punya sumber tipe tertentu (misal 01_rag_scraping gak punya
+# reference_doc) otomatis skew ke tier yang mencerminkan realita ekosistemnya
+# -- itu jujur, bukan cacat yang perlu ditambal paksa.
+CONTENT_TIER_MAP = {
+    "reference_doc": "Referensi Resmi",
+    "web_article": "Analisis/Writeup",
+    "hackernews_discussion": "Diskusi Komunitas",
+    "github_repository": "Implementasi/Contoh Kode",
+}
+
+def infer_content_tier(metadata: dict) -> str:
+    source_type = metadata.get("source_type", "")
+    # Default ke 'Implementasi/Contoh Kode' buat record lama yang belum
+    # sempat dikasih source_type eksplisit -- mayoritas record awal proyek
+    # ini emang dari repo GitHub, jadi ini asumsi yang aman, bukan tebakan buta.
+    return CONTENT_TIER_MAP.get(source_type, "Implementasi/Contoh Kode")
+
 def get_content_hash(text: str) -> str:
     # Normalisasi teks: hilangkan spasi berlebih dan case
     clean = re.sub(r"\s+", " ", text.strip().lower())
@@ -131,6 +152,8 @@ def process_domain(domain_name: str, registry: dict) -> int:
             continue
 
         # Format Fixed Core + Dynamic Metadata
+        record_metadata = data.get("metadata", {})
+        record_metadata["content_tier"] = infer_content_tier(record_metadata)
         clean_record = {
             "id": data.get("id"),
             "domain": domain_name,
@@ -139,7 +162,7 @@ def process_domain(domain_name: str, registry: dict) -> int:
             "content": content,
             "source_url": data.get("source_url"),
             "created_at": data.get("created_at"),
-            "metadata": data.get("metadata", {})
+            "metadata": record_metadata
         }
 
         new_records.append(clean_record)

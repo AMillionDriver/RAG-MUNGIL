@@ -1,22 +1,18 @@
-export interface RagRecord {
-  id: string;
-  domain: string;
-  title: string;
-  summary: string;
-  content: string;
-  source_url: string;
-  created_at: string;
-  metadata: {
-    stars?: number;
-    repo_name?: string;
-    bypassed_wafs?: string[];
-    tier?: 'GOLD_CURATED' | 'DISCOVERED';
-    code_snippets?: string[];
-    [key: string]: any;
-  };
-}
+/**
+ * PERINGATAN — INI BUKAN SUMBER DATA APLIKASI.
+ *
+ * Snapshot beku ini HANYA dipakai untuk development offline (mis. `npm run dev`
+ * tanpa koneksi internet). Data aplikasi yang sesungguhnya ditarik langsung dan
+ * live dari repositori GitHub lewat src/lib/ragData.ts — jangan import
+ * MOCK_OFFLINE_DATASET ini di App.tsx atau komponen produksi manapun, karena
+ * isinya akan selalu ketinggalan dari bot auto-harvest yang jalan tiap 2 jam.
+ *
+ * Tipe RagRecord kanonis ada di src/lib/ragData.ts — import dari sana, bukan
+ * dari sini, supaya tidak ada dua definisi tipe yang bisa menyimpang.
+ */
+import type { RagRecord } from '../lib/ragData';
 
-export const INITIAL_DATASET: RagRecord[] = [
+export const MOCK_OFFLINE_DATASET: RagRecord[] = [
   {
     id: "scraping_curl_cffi_curl_cffi",
     domain: "01_rag_scraping",

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Search, Shield, Terminal, Copy, Check, ExternalLink, Star, Code2, Sparkles, Filter } from 'lucide-react';
-import { RagRecord } from '../data/scrapingDataset';
+import { Search, Copy, Check, ExternalLink, Star, Code2 } from 'lucide-react';
+import { type RagRecord } from '../lib/ragData';
 
 interface DatasetViewerProps {
   dataset: RagRecord[];
@@ -8,13 +8,13 @@ interface DatasetViewerProps {
 
 export default function DatasetViewer({ dataset }: DatasetViewerProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedDomain, setSelectedDomain] = useState<string>('ALL');
   const [selectedWaf, setSelectedWaf] = useState<string>('ALL');
-  const [selectedTier, setSelectedTier] = useState<string>('ALL');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [rawViewId, setRawViewId] = useState<string | null>(null);
 
-  const wafList = ['ALL', 'Cloudflare', 'Akamai', 'Datadome', 'Kasada', 'Turnstile'];
+  const wafList = Array.from(
+    new Set(dataset.flatMap((d) => d.metadata.bypassed_wafs || []))
+  );
 
   const filteredRecords = dataset.filter((record) => {
     const q = searchQuery.toLowerCase();
@@ -25,19 +25,11 @@ export default function DatasetViewer({ dataset }: DatasetViewerProps) {
       record.content.toLowerCase().includes(q) ||
       record.metadata.repo_name?.toLowerCase().includes(q);
 
-    const matchDomain =
-      selectedDomain === 'ALL' || record.domain === selectedDomain;
-
     const matchWaf =
       selectedWaf === 'ALL' ||
-      record.metadata.bypassed_wafs?.some(
-        (w) => w.toLowerCase() === selectedWaf.toLowerCase()
-      );
+      record.metadata.bypassed_wafs?.some((w) => w.toLowerCase() === selectedWaf.toLowerCase());
 
-    const matchTier =
-      selectedTier === 'ALL' || record.metadata.tier === selectedTier;
-
-    return matchSearch && matchDomain && matchWaf && matchTier;
+    return matchSearch && matchWaf;
   });
 
   const handleCopyCode = (id: string, code: string) => {
@@ -47,98 +39,34 @@ export default function DatasetViewer({ dataset }: DatasetViewerProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Search & Filter Controls */}
-      <div className="bg-[#121214] p-5 rounded-2xl border border-white/10 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari teknik, bypass Cloudflare, JA4, Playwright, tls-client..."
-              className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-white/40 focus:outline-none focus:border-emerald-500/50 transition-colors"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSelectedTier('ALL')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                selectedTier === 'ALL'
-                  ? 'bg-white/15 text-white border border-white/20'
-                  : 'text-white/40 hover:text-white/70'
-              }`}
-            >
-              Semua ({dataset.length})
-            </button>
-            <button
-              onClick={() => setSelectedTier('GOLD_CURATED')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
-                selectedTier === 'GOLD_CURATED'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                  : 'text-white/40 hover:text-amber-300/70'
-              }`}
-            >
-              <Sparkles className="w-3 h-3 text-amber-400" />
-              Gold Curated
-            </button>
-          </div>
+    <div className="space-y-4">
+      {/* Kotak pencarian — ledger control, bukan card SaaS */}
+      <div className="border-b border-ink-600 pb-3 space-y-2.5">
+        <div className="relative">
+          <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-paper-dim" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Cari di dalam katalog — nama repo, target bypass, jenis kerentanan..."
+            className="w-full bg-transparent border-b border-ink-600 pl-6 pr-2 py-1.5 text-[13px] text-paper placeholder-paper-dim/60 focus:outline-none focus:border-verdigris transition-colors"
+          />
         </div>
 
-        {/* Domain Filters */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/5">
-          <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold flex items-center gap-1 mr-1">
-            <Filter className="w-3 h-3" /> Domain:
-          </span>
-          <button
-            onClick={() => setSelectedDomain('ALL')}
-            className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all ${
-              selectedDomain === 'ALL'
-                ? 'bg-white/15 text-white border border-white/20 font-semibold'
-                : 'bg-white/[0.02] text-white/50 hover:text-white border border-white/5'
-            }`}
-          >
-            Semua Domain
-          </button>
-          <button
-            onClick={() => setSelectedDomain('01_rag_scraping')}
-            className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all ${
-              selectedDomain === '01_rag_scraping'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold'
-                : 'bg-white/[0.02] text-white/50 hover:text-white border border-white/5'
-            }`}
-          >
-            🛡️ 01: Scraping & Anti-Bot
-          </button>
-          <button
-            onClick={() => setSelectedDomain('02_web3_smart_contract')}
-            className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all ${
-              selectedDomain === '02_web3_smart_contract'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30 font-semibold'
-                : 'bg-white/[0.02] text-white/50 hover:text-white border border-white/5'
-            }`}
-          >
-            ⛓️ 02: Web3 & Smart Contract
-          </button>
-        </div>
-
-        {/* WAF Tag Filters */}
-        {selectedDomain !== '02_web3_smart_contract' && (
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="text-[11px] text-white/40 uppercase tracking-wider font-semibold flex items-center gap-1 mr-1">
-              <Shield className="w-3 h-3" /> Target WAF:
-            </span>
+        {wafList.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px]">
+            <span className="text-paper-dim">Target:</span>
+            <button
+              onClick={() => setSelectedWaf('ALL')}
+              className={selectedWaf === 'ALL' ? 'text-paper underline underline-offset-2' : 'text-paper-dim hover:text-paper'}
+            >
+              semua
+            </button>
             {wafList.map((waf) => (
               <button
                 key={waf}
                 onClick={() => setSelectedWaf(waf)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all ${
-                  selectedWaf === waf
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold'
-                    : 'bg-white/[0.02] text-white/50 hover:text-white border border-white/5'
-                }`}
+                className={selectedWaf === waf ? 'text-paper underline underline-offset-2' : 'text-paper-dim hover:text-paper'}
               >
                 {waf}
               </button>
@@ -147,156 +75,92 @@ export default function DatasetViewer({ dataset }: DatasetViewerProps) {
         )}
       </div>
 
-      {/* Records List */}
-      <div className="space-y-4">
-        {filteredRecords.length === 0 ? (
-          <div className="text-center py-12 bg-[#121214] rounded-2xl border border-white/10 text-white/40 space-y-2">
-            <p className="text-sm">Tidak ada teknik yang cocok dengan kata kunci tersebut.</p>
-            <p className="text-xs">Coba cari "cloudflare", "tls", "camoufox", atau klik reset filter.</p>
-          </div>
-        ) : (
-          filteredRecords.map((record) => (
-            <div
-              key={record.id}
-              className="bg-[#121214] rounded-2xl border border-white/10 p-5 space-y-4 transition-all hover:border-white/20"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                <div className="space-y-1.5 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {record.metadata.tier === 'GOLD_CURATED' ? (
-                      <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-bold flex items-center gap-1">
-                        <Sparkles className="w-2.5 h-2.5" /> GOLD TIER
-                      </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-mono">
-                        DISCOVERED
-                      </span>
-                    )}
+      {/* Daftar spesimen */}
+      {filteredRecords.length === 0 ? (
+        <div className="py-10 text-[13px] text-paper-dim">
+          <p>Tidak ada spesimen yang cocok dengan pencarian itu.</p>
+          <p className="mt-1">Coba istilah lain, atau bersihkan filter target di atas.</p>
+        </div>
+      ) : (
+        <div className="divide-y divide-ink-600">
+          {filteredRecords.map((record) => {
+            const isWeb3 = record.domain === '02_web3_smart_contract';
+            const accentColor = isWeb3 ? 'var(--color-oxide)' : 'var(--color-verdigris)';
 
-                    <span className="text-[11px] font-mono text-white/40">
-                      ID: {record.id}
-                    </span>
-
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium ${
-                        record.domain === '02_web3_smart_contract'
-                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                      }`}
-                    >
-                      {record.domain}
-                    </span>
-
-                    {record.metadata.stars !== undefined && record.metadata.stars > 0 && (
-                      <span className="text-[11px] text-amber-400/90 flex items-center gap-0.5">
-                        <Star className="w-3 h-3 fill-amber-400/40" />
-                        {record.metadata.stars}
-                      </span>
-                    )}
-                  </div>
-
-                  <h3 className="text-base font-semibold text-white tracking-tight">
-                    {record.title}
-                  </h3>
-                  <p className="text-xs text-white/60 leading-relaxed">
-                    {record.summary}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => setRawViewId(rawViewId === record.id ? null : record.id)}
-                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white text-xs flex items-center gap-1 border border-white/10"
-                    title="Lihat Raw JSONL"
-                  >
-                    <Code2 className="w-3.5 h-3.5" />
-                    <span>JSONL</span>
-                  </button>
-
-                  <a
-                    href={record.source_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white text-xs flex items-center gap-1 border border-white/10"
-                    title="Buka Repositori Asli"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Source</span>
-                  </a>
-                </div>
-              </div>
-
-              {/* Badges: Target WAF or Web3 Vuln/Protocol */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                {record.metadata.bypassed_wafs && (
-                  <>
-                    <span className="text-[10px] text-white/30 uppercase tracking-widest font-semibold mr-1">
-                      Bypass Targets:
-                    </span>
-                    {record.metadata.bypassed_wafs.map((waf) => (
-                      <span
-                        key={waf}
-                        className="px-2 py-0.5 rounded-md bg-white/[0.04] text-white/70 border border-white/10 text-[10px] font-mono"
-                      >
-                        {waf}
-                      </span>
-                    ))}
-                  </>
-                )}
-
-                {record.metadata.vuln_type && (
-                  <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20 text-[10px] font-mono">
-                    Celah: {record.metadata.vuln_type}
-                  </span>
-                )}
-
-                {record.metadata.protocol && (
-                  <span className="px-2 py-0.5 rounded-md bg-white/[0.04] text-white/60 border border-white/10 text-[10px] font-mono">
-                    Protokol: {record.metadata.protocol}
-                  </span>
-                )}
-              </div>
-
-              {/* Code Snippet Box */}
-              {record.metadata.code_snippets && record.metadata.code_snippets.length > 0 && (
-                <div className="bg-[#09090b] rounded-xl border border-white/10 p-3.5 space-y-2">
-                  <div className="flex items-center justify-between text-[11px] text-white/50 border-b border-white/5 pb-2">
-                    <span className="flex items-center gap-1.5 font-mono text-emerald-400">
-                      <Terminal className="w-3.5 h-3.5" /> Implementasi Python:
-                    </span>
-                    <button
-                      onClick={() => handleCopyCode(record.id, record.metadata.code_snippets![0])}
-                      className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] flex items-center gap-1 transition-all"
-                    >
-                      {copiedId === record.id ? (
-                        <>
-                          <Check className="w-3 h-3 text-emerald-400" />
-                          <span className="text-emerald-400">Tersalin!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>Salin Kode</span>
-                        </>
+            return (
+              <article key={record.id} className="py-4 pl-3 border-l-2" style={{ borderColor: accentColor }}>
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-paper-dim font-mono mb-1">
+                      <span>{record.id}</span>
+                      {record.metadata.tier === 'GOLD_CURATED' && (
+                        <span style={{ color: accentColor }}>· gold-tier</span>
                       )}
-                    </button>
-                  </div>
-                  <pre className="text-xs font-mono text-white/80 overflow-x-auto p-1 leading-relaxed">
-                    <code>{record.metadata.code_snippets[0]}</code>
-                  </pre>
-                </div>
-              )}
+                      {record.metadata.stars !== undefined && record.metadata.stars > 0 && (
+                        <span className="inline-flex items-center gap-0.5">
+                          <Star className="w-3 h-3" /> {record.metadata.stars.toLocaleString('id-ID')}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-catalog-heading text-[15px] text-paper">{record.title}</h3>
+                    <p className="text-[13px] text-paper-dim mt-1 leading-relaxed">{record.summary}</p>
 
-              {/* Raw JSONL Accordion */}
-              {rawViewId === record.id && (
-                <div className="bg-[#050505] rounded-xl p-3 border border-dashed border-white/20 text-[11px] font-mono text-emerald-300/80 overflow-x-auto">
-                  <pre>{JSON.stringify(record, null, 2)}</pre>
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[11px] text-paper-dim">
+                      {record.metadata.bypassed_wafs?.map((w) => <span key={w}>#{w}</span>)}
+                      {record.metadata.vuln_type && <span>#{record.metadata.vuln_type}</span>}
+                      {record.metadata.protocol && <span>#{record.metadata.protocol}</span>}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0 text-[12px]">
+                    <button
+                      onClick={() => setRawViewId(rawViewId === record.id ? null : record.id)}
+                      className="flex items-center gap-1 text-paper-dim hover:text-paper transition-colors"
+                    >
+                      <Code2 className="w-3.5 h-3.5" /> JSONL
+                    </button>
+                    <a
+                      href={record.source_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 text-paper-dim hover:text-paper transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" /> Sumber
+                    </a>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+
+                {record.metadata.code_snippets && record.metadata.code_snippets.length > 0 && (
+                  <div className="mt-3 bg-ink-950 border border-ink-600 rounded p-3">
+                    <div className="flex items-center justify-between text-[11px] text-paper-dim mb-2 font-mono">
+                      <span>implementasi</span>
+                      <button
+                        onClick={() => handleCopyCode(record.id, record.metadata.code_snippets![0])}
+                        className="flex items-center gap-1 hover:text-paper transition-colors"
+                      >
+                        {copiedId === record.id ? (
+                          <><Check className="w-3 h-3" style={{ color: accentColor }} /> tersalin</>
+                        ) : (
+                          <><Copy className="w-3 h-3" /> salin</>
+                        )}
+                      </button>
+                    </div>
+                    <pre className="text-[12px] font-mono text-paper-dim overflow-x-auto leading-relaxed">
+                      <code>{record.metadata.code_snippets[0]}</code>
+                    </pre>
+                  </div>
+                )}
+
+                {rawViewId === record.id && (
+                  <pre className="mt-3 bg-ink-950 border border-dashed border-ink-600 rounded p-3 text-[11px] font-mono text-paper-dim overflow-x-auto">
+                    {JSON.stringify(record, null, 2)}
+                  </pre>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

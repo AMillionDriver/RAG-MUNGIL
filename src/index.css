@@ -1,13 +1,56 @@
 @import "tailwindcss";
 
+/*
+  Bahasa desain: "Katalog Situs Galian" — tiap teknik yang di-harvest
+  diperlakukan sebagai spesimen yang dicatat di buku katalog, bukan kartu
+  dashboard SaaS. Palet ditarik dari material arkeologi asli: perunggu
+  berpatina (verdigris) untuk domain 01, karat besi tua (oxide) untuk
+  domain 02 — bukan warna aksen generik.
+*/
+@theme {
+  --color-ink-950: #171310;
+  --color-ink-900: #1B1712;
+  --color-ink-800: #242019;
+  --color-ink-700: #2E281F;
+  --color-ink-600: #453D2E;
+  --color-paper: #EDE6D8;
+  --color-paper-dim: #9C9284;
+  --color-verdigris: #7C9A82;
+  --color-verdigris-dim: #5C7566;
+  --color-oxide: #B5654A;
+  --color-oxide-dim: #8A4C38;
+
+  --font-serif: 'IBM Plex Serif', Georgia, serif;
+  --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
 @layer base {
   body {
-    background-color: #080808;
-    color: #F2F2F2;
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--color-ink-900);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-verdigris) 30%, transparent);
+  }
+
+  /* Fokus keyboard tetap kelihatan jelas, jangan dihilangkan demi estetika. */
+  :focus-visible {
+    outline: 2px solid var(--color-verdigris);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-.font-serif-display {
-  font-family: 'Playfair Display', Georgia, serif;
+.font-catalog-heading {
+  font-family: var(--font-serif);
 }

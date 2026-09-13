@@ -41,8 +41,9 @@ def load_registry() -> dict:
                 return json.load(f)
         except Exception:
             pass
+    # Skema flat: key domain_id langsung di top-level (BUKAN dibungkus "domains"),
+    # supaya konsisten dengan cara process_domain()/main() membaca & menulisnya.
     return {
-        "domains": {},
         "total_records": 0,
         "last_sync": "",
         "hashes": []
@@ -151,6 +152,14 @@ def process_domain(domain_name: str, registry: dict) -> int:
     # menjamin urutan kronologis asli dari data tertua sampai terbaru.
     all_keys = list(ordered_hashes.keys())
     registry["hashes"] = all_keys[-MAX_HASHES_WINDOW:]
+
+    # Catat status per-domain (bukan cuma agregat global) — dipakai frontend
+    # (src/lib/ragData.ts) dan tooling lain untuk tahu kapan tiap situs
+    # terakhir disurvei dan berapa total spesimennya masing-masing.
+    registry[domain_name] = {
+        "last_updated": datetime.utcnow().isoformat() + "Z",
+        "total_records": len(existing_token_sets)
+    }
     return added_count, new_records
 
 def main():
@@ -175,7 +184,13 @@ def main():
                     ]
                 total_added += added
 
-    registry["total_records"] = registry.get("total_records", 0) + total_added
+    # Total global dihitung ulang dari angka per-domain yang akurat (bukan
+    # akumulasi total_added tiap run), supaya tidak pernah drift kalau nanti
+    # ada record yang diarsipkan/dihapus di luar alur tambah-saja ini.
+    registry["total_records"] = sum(
+        v.get("total_records", 0) for k, v in registry.items()
+        if isinstance(v, dict) and "total_records" in v
+    )
     registry["last_sync"] = datetime.utcnow().isoformat() + "Z"
     save_registry(registry)
 

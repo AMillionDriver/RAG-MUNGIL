@@ -1,74 +1,96 @@
-import { useState } from 'react';
-import { GitBranch, Clock, ShieldCheck, RefreshCw, CheckCircle2, ArrowUpRight, Github } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Clock, ShieldCheck, GitCommit } from 'lucide-react';
+import { timeAgo } from '../lib/ragData';
+
+interface RunInfo {
+  status: string;
+  conclusion: string | null;
+  createdAt: string;
+  htmlUrl: string;
+}
 
 export default function GitHubWorkflowStatus() {
+  const [run, setRun] = useState<RunInfo | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('https://api.github.com/repos/AMillionDriver/RAG-MUNGIL/actions/runs?per_page=1')
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        const latest = data.workflow_runs?.[0];
+        if (!latest) throw new Error('tidak ada run tercatat');
+        setRun({
+          status: latest.status,
+          conclusion: latest.conclusion,
+          createdAt: latest.created_at,
+          htmlUrl: latest.html_url,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setLoadFailed(true);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
   return (
-    <div className="space-y-6">
-      <div className="bg-[#121214] p-6 rounded-2xl border border-white/10 space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <Github className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-white">Status GitHub Actions Auto-Harvester</h2>
-              <p className="text-xs text-white/50">Mesin otonom di repositori AMillionDriver/RAG-MUNGIL</p>
-            </div>
-          </div>
-
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>Workflow: SUCCESS (Active)</span>
-          </div>
-        </div>
-
-        {/* Feature Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-[#09090b] p-4 rounded-xl border border-white/5 space-y-2">
-            <div className="flex items-center gap-2 text-white/70 text-xs font-semibold">
-              <Clock className="w-4 h-4 text-purple-400" />
-              <span>Jadwal Pemanenan</span>
-            </div>
-            <p className="text-sm font-mono text-white">0 */2 * * *</p>
-            <p className="text-[11px] text-white/40">Berjalan otomatis setiap 2 jam sekali tanpa perlu laptop menyala.</p>
-          </div>
-
-          <div className="bg-[#09090b] p-4 rounded-xl border border-white/5 space-y-2">
-            <div className="flex items-center gap-2 text-white/70 text-xs font-semibold">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Anti-Conflict Rebase</span>
-            </div>
-            <p className="text-sm font-mono text-white">git pull --rebase</p>
-            <p className="text-[11px] text-white/40">Mencegah bentrok commit saat Anda membuka/mengedit repo dari HP.</p>
-          </div>
-
-          <div className="bg-[#09090b] p-4 rounded-xl border border-white/5 space-y-2">
-            <div className="flex items-center gap-2 text-white/70 text-xs font-semibold">
-              <RefreshCw className="w-4 h-4 text-blue-400" />
-              <span>Deduplikasi SHA-256</span>
-            </div>
-            <p className="text-sm font-mono text-white">Zero Duplicate Hash</p>
-            <p className="text-[11px] text-white/40">DATA_CLEANER.py menjamin tidak ada duplikasi konten di file JSONL.</p>
-          </div>
-        </div>
-
-        {/* Official Export Notice */}
-        <div className="bg-gradient-to-r from-emerald-950/40 via-[#0d1612] to-[#121214] border border-emerald-500/30 rounded-xl p-4 space-y-2">
-          <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs">
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Cara Push / Export Resmi dari AI Studio ke GitHub</span>
-          </div>
-          <p className="text-xs text-white/70 leading-relaxed">
-            Karena Anda telah mengotorisasi aplikasi resmi <strong>Google AI Studio</strong> di akun GitHub Anda:
-          </p>
-          <ol className="text-xs text-white/60 list-decimal list-inside space-y-1 pl-1">
-            <li>Buka menu di kanan atas antarmuka AI Studio Anda (ikon GitHub atau tombol <strong>Export / Settings</strong>).</li>
-            <li>Pilih opsi <strong>"Push to GitHub"</strong> atau <strong>"Export to GitHub"</strong>.</li>
-            <li>Arahkan ke repositori <code>AMillionDriver/RAG-MUNGIL</code>.</li>
-            <li>Semua file arsitektur Gold Tier dari workspace ini akan langsung ter-update di repositori Anda!</li>
-          </ol>
-        </div>
+    <div className="space-y-5 max-w-2xl">
+      <div>
+        <h2 className="font-catalog-heading text-[16px] text-paper">Log ekspedisi situs</h2>
+        <p className="text-[13px] text-paper-dim mt-1">
+          Mesin otonom di repositori <code className="font-mono text-[12px]">AMillionDriver/RAG-MUNGIL</code>, disurvei ulang tanpa perlu laptop menyala.
+        </p>
       </div>
+
+      <div className="border-l-2 border-verdigris pl-3 py-1">
+        {loadFailed && (
+          <p className="text-[13px] text-paper-dim">Status ekspedisi terakhir tidak bisa dimuat — coba buka langsung ke tab Actions di repositori.</p>
+        )}
+        {!loadFailed && !run && (
+          <p className="text-[13px] text-paper-dim">Memeriksa ekspedisi terakhir...</p>
+        )}
+        {run && (
+          <a href={run.htmlUrl} target="_blank" rel="noreferrer" className="block group">
+            <p className="text-[13px] text-paper">
+              Ekspedisi terakhir:{' '}
+              <span className={run.conclusion === 'success' ? 'text-verdigris' : 'text-oxide'}>
+                {run.conclusion ?? run.status}
+              </span>
+            </p>
+            <p className="text-[11px] text-paper-dim mt-0.5 group-hover:text-paper transition-colors">
+              {timeAgo(run.createdAt)} — lihat detail run →
+            </p>
+          </a>
+        )}
+      </div>
+
+      <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-[13px]">
+        <div>
+          <dt className="flex items-center gap-1.5 text-paper-dim mb-1">
+            <Clock className="w-3.5 h-3.5" /> Jadwal
+          </dt>
+          <dd className="font-mono text-paper">0 */2 * * *</dd>
+          <dd className="text-[11px] text-paper-dim mt-0.5">tiap 2 jam, UTC</dd>
+        </div>
+        <div>
+          <dt className="flex items-center gap-1.5 text-paper-dim mb-1">
+            <GitCommit className="w-3.5 h-3.5" /> Commit
+          </dt>
+          <dd className="text-paper">atomic + retry 3x</dd>
+          <dd className="text-[11px] text-paper-dim mt-0.5">anti-race antar situs</dd>
+        </div>
+        <div>
+          <dt className="flex items-center gap-1.5 text-paper-dim mb-1">
+            <ShieldCheck className="w-3.5 h-3.5" /> Dedup
+          </dt>
+          <dd className="text-paper">hash + fuzzy 82%</dd>
+          <dd className="text-[11px] text-paper-dim mt-0.5">basmi fork/copy-paste</dd>
+        </div>
+      </dl>
     </div>
   );
 }

@@ -21,7 +21,9 @@ jobs:
         domain:
           - 01_rag_scraping
           - 02_web3_smart_contract
-
+          - 03_ai_agent_security
+          - 04_vulnerability_research
+          - 05_cloud_devsecops
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

@@ -5,6 +5,11 @@ import re
 import sqlite3
 from typing import Tuple, Optional
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DOMAINS_DIR = os.path.join(CURRENT_DIR, "domains")
 CACHE_DB = os.path.join(CURRENT_DIR, "storage_final", "search_cache.db")

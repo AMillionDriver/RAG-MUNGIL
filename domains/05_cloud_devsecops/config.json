@@ -1,0 +1,141 @@
+{
+  "domain_id": "05_cloud_devsecops",
+  "domain_label": "Cloud Security Hardening & DevSecOps",
+  "accept_threshold": 75,
+  "min_word_count": 100,
+  "code_over_text_tolerance": true,
+  "scoring_strategy": {
+    "recency_sensitive": true,
+    "evergreen_bonus": false
+  },
+  "ingestion_targets": {
+    "primary": "README.md",
+    "source_file_patterns": [
+      "*.tf",
+      "*.yaml",
+      "*.yml",
+      "*.rego"
+    ],
+    "max_source_files": 4
+  },
+  "enabled_sources": [
+    "github_seeds",
+    "github_search",
+    "hackernews"
+  ],
+  "seeds": [
+    {
+      "repo": "aquasecurity/trivy",
+      "topic": "Comprehensive Security Scanner for Containers & IaC"
+    },
+    {
+      "repo": "bridgecrewio/checkov",
+      "topic": "Static Code Analysis for Infrastructure as Code"
+    },
+    {
+      "repo": "open-policy-agent/opa",
+      "topic": "General-Purpose Policy Engine & Policy-as-Code"
+    },
+    {
+      "repo": "prowler-cloud/prowler",
+      "topic": "AWS/Azure/GCP Cloud Security Posture Assessment"
+    },
+    {
+      "repo": "aquasecurity/kube-bench",
+      "topic": "Checks Kubernetes Deployment Against CIS Benchmarks"
+    },
+    {
+      "repo": "cisagov/scuba",
+      "topic": "Secure Cloud Business Applications Baselines & Automation"
+    },
+    {
+      "repo": "nccgroup/ScoutSuite",
+      "topic": "Multi-Cloud Security-Auditing Tool"
+    }
+  ],
+  "stratified_query_templates": [
+    "\"{target}\" \"{tool}\" security hardening",
+    "\"cloud security\" \"{target}\" audit stars:10..2500",
+    "\"{tool}\" iac security policy rego",
+    "\"kubernetes\" cis benchmark hardening",
+    "\"aws iam\" privilege escalation detection policy",
+    "\"devsecops\" pipeline security scanner"
+  ],
+  "template_variables": {
+    "target": [
+      "kubernetes",
+      "aws iam",
+      "terraform",
+      "docker",
+      "gcp",
+      "azure",
+      "github actions"
+    ],
+    "tool": [
+      "trivy",
+      "checkov",
+      "prowler",
+      "opa",
+      "kube-bench",
+      "scoutsuite",
+      "semgrep"
+    ]
+  },
+  "hn_queries": [
+    "cloud security posture hardening",
+    "kubernetes security cis benchmark",
+    "infrastructure as code security checkov",
+    "aws iam privilege escalation",
+    "devsecops pipeline security"
+  ],
+  "target_waf_tags": [
+    "trivy",
+    "checkov",
+    "prowler",
+    "opa",
+    "kubernetes-security",
+    "iac-security",
+    "cis-benchmark",
+    "aws-security"
+  ],
+  "actionable_code_signatures": [
+    "resource \"aws_",
+    "package terraform",
+    "package kubernetes",
+    "default allow = false",
+    "deny\\[",
+    "apiVersion: security",
+    "PodSecurityPolicy",
+    "SecurityContext",
+    "trivy",
+    "checkov",
+    "prowler"
+  ],
+  "dummy_code_patterns": [
+    "docker\\s+run\\s+hello-world"
+  ],
+  "technical_keywords": {
+    "cloud security": 12,
+    "devsecops": 12,
+    "cis benchmark": 15,
+    "hardening": 12,
+    "iac security": 15,
+    "trivy": 12,
+    "checkov": 12,
+    "prowler": 12,
+    "rego": 12,
+    "policy as code": 15,
+    "kubernetes security": 15,
+    "iam policy": 12,
+    "least privilege": 12,
+    "misconfiguration": 10,
+    "posture management": 12,
+    "container security": 12
+  },
+  "spam_patterns": [
+    "buy\\s+now",
+    "discount\\s+\\d+%",
+    "promo\\s+code",
+    "affiliate\\s+link"
+  ]
+}

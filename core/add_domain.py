@@ -18,6 +18,11 @@ import re
 import argparse
 from typing import List, Dict, Any
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOMAINS_DIR = os.path.join(BASE_DIR, "domains")
 WORKFLOW_FILE = os.path.join(BASE_DIR, ".github", "workflows", "harvest.yml")

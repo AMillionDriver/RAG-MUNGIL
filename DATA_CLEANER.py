@@ -1,9 +1,15 @@
 import os
+import sys
 import json
 import re
 import hashlib
 from datetime import datetime
 from typing import Set, List, Dict
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOMAINS_DIR = os.path.join(BASE_DIR, "domains")

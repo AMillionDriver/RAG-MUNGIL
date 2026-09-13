@@ -1,0 +1,161 @@
+{
+  "domain_id": "03_ai_agent_security",
+  "domain_label": "AI Agent Security & LLM Guardrails",
+  "accept_threshold": 75,
+  "min_word_count": 100,
+  "code_over_text_tolerance": true,
+  "scoring_strategy": {
+    "recency_sensitive": true,
+    "evergreen_bonus": false
+  },
+  "ingestion_targets": {
+    "primary": "README.md",
+    "source_file_patterns": [
+      "*.py",
+      "*.yaml",
+      "*.yml"
+    ],
+    "max_source_files": 3
+  },
+  "enabled_sources": [
+    "github_seeds",
+    "github_search",
+    "hackernews"
+  ],
+  "seeds": [
+    {
+      "repo": "NVIDIA/NeMo-Guardrails",
+      "topic": "Programmable Guardrails & Dialogue Safety Architecture for LLMs"
+    },
+    {
+      "repo": "meta-llama/llama-guard",
+      "topic": "Llama Guard Safety Classifier & Policy Enforcement"
+    },
+    {
+      "repo": "protectai/rebuff",
+      "topic": "Prompt Injection Detection & Canary Token Defense"
+    },
+    {
+      "repo": "leondz/garak",
+      "topic": "LLM Vulnerability Probing & Security Evaluation Scanner"
+    },
+    {
+      "repo": "Azure/PyRIT",
+      "topic": "Python Risk Identification Tool for Generative AI & Red Teaming"
+    },
+    {
+      "repo": "centerforaisafety/harmbench",
+      "topic": "HarmBench: Standardized Safety & Adversarial Robustness Benchmarks"
+    },
+    {
+      "repo": "confident-ai/deepeval",
+      "topic": "LLM Evaluation Framework for Hallucination & Security Unit Testing"
+    },
+    {
+      "repo": "deadbits/vigil-llm",
+      "topic": "Prompt Injection & Jailbreak Detection Security Scanner"
+    }
+  ],
+  "stratified_query_templates": [
+    "\"{topic}\" \"{tool}\" pushed:>2024-01-01",
+    "\"{topic}\" \"{defense}\" python stars:10..2500",
+    "\"llm guardrails\" \"{topic}\" stars:15..3000",
+    "\"indirect prompt injection\" defense python",
+    "\"agent security\" sandbox \"{defense}\"",
+    "\"prompt injection\" detector benchmark",
+    "\"{tool}\" security evaluation llm",
+    "\"system prompt leak\" defense python"
+  ],
+  "template_variables": {
+    "topic": [
+      "prompt injection",
+      "jailbreak defense",
+      "indirect prompt injection",
+      "agent sandboxing",
+      "adversarial robustness",
+      "hallucination mitigation",
+      "tool call verification",
+      "system prompt protection"
+    ],
+    "tool": [
+      "nemo-guardrails",
+      "llama-guard",
+      "rebuff",
+      "garak",
+      "pyrit",
+      "deepeval",
+      "vigil-llm"
+    ],
+    "defense": [
+      "canary token",
+      "input sanitization",
+      "output validation",
+      "semantic guardrails",
+      "sandbox isolation",
+      "policy filter"
+    ]
+  },
+  "hn_queries": [
+    "prompt injection defense",
+    "llm guardrails architecture",
+    "ai agent security sandbox",
+    "indirect prompt injection",
+    "llama guard benchmark"
+  ],
+  "target_waf_tags": [
+    "guardrails",
+    "nemo-guardrails",
+    "llama-guard",
+    "prompt-injection",
+    "jailbreak-defense",
+    "canary-token",
+    "agent-sandbox"
+  ],
+  "actionable_code_signatures": [
+    "RailsConfig",
+    "LLMRails",
+    "LlamaGuard",
+    "rebuff",
+    "garak",
+    "PromptInjection",
+    "guardrail",
+    "SystemMessage",
+    "tool_call_validator",
+    "sanitize_input",
+    "canary_token",
+    "detect_injection",
+    "input_moderation",
+    "evaluate_safety"
+  ],
+  "dummy_code_patterns": [
+    "print\\(['\"]hello\\s+world['\"]\\)",
+    "openai\\.ChatCompletion\\.create\\(model=['\"]gpt-3\\.5['\"],\\s*messages=\\["
+  ],
+  "technical_keywords": {
+    "prompt injection": 15,
+    "indirect prompt injection": 15,
+    "guardrail": 12,
+    "guardrails": 12,
+    "nemo guardrails": 15,
+    "llama guard": 15,
+    "jailbreak defense": 15,
+    "adversarial prompt": 12,
+    "canary token": 12,
+    "system prompt leak": 12,
+    "red teaming": 10,
+    "agent sandboxing": 12,
+    "pyrit": 12,
+    "garak": 12,
+    "hallucination mitigation": 10,
+    "tool calling security": 12,
+    "content safety": 10,
+    "evals": 10
+  },
+  "spam_patterns": [
+    "buy\\s+now",
+    "discount\\s+\\d+%",
+    "promo\\s+code",
+    "affiliate\\s+link",
+    "sign\\s+up\\s+for\\s+free\\s+credits"
+  ]
+}

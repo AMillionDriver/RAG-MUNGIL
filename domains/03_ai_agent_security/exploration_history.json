@@ -1,0 +1,42 @@
+{
+  "visited_repos": [
+    "NVIDIA-NeMo/Guardrails",
+    "NVIDIA/NeMo-Guardrails",
+    "3nesdeniz/injectbench",
+    "NVIDIA/garak",
+    "confident-ai/deepeval",
+    "leondz/garak"
+  ],
+  "visited_articles": [
+    "41302597",
+    "48586263",
+    "49045271",
+    "47139768",
+    "45749661",
+    "34976886",
+    "46048996",
+    "41246643",
+    "49273549",
+    "47908789",
+    "47677504",
+    "39780651",
+    "47036723"
+  ],
+  "rejected": [
+    "Azure/PyRIT",
+    "deadbits/vigil-llm",
+    "ggerganov/llama.cpp",
+    "protectai/rebuff",
+    "agencyenterprise/promptinject",
+    "Samgar-kz/agentprobe",
+    "lovec-tech/proba-ipi-eval",
+    "tokencanopy/e2a-bench",
+    "david-spies/lota-guard",
+    "psf/black",
+    "centerforaisafety/harmbench",
+    "agencyenterprise/PromptInject",
+    "christopherignas/rag-prompt-injection-demo",
+    "heisenberg-alt/pi-bench",
+    "Yeagerist0/prompt-injection-soc-telemetry"
+  ]
+}

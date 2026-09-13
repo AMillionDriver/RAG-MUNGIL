@@ -1,9 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ShieldCheck, ShieldAlert, Lock, CheckCircle2, RefreshCw, Terminal, Globe, Cpu, ExternalLink, Shield } from 'lucide-react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { ShieldCheck, ShieldAlert, Lock, CheckCircle2, RefreshCw, Terminal, Globe, Cpu, ExternalLink, Shield, ToggleLeft, ToggleRight } from 'lucide-react';
+
+export interface TurnstileKeys {
+  invisible: string;
+  interactive: string;
+}
 
 interface TurnstileGatewayProps {
-  siteKey: string;
-  onVerified: (token: string, rayId: string) => void;
+  keys: TurnstileKeys;
+  onVerified: (token: string, rayId: string, mode: 'invisible' | 'interactive') => void;
 }
 
 declare global {
@@ -40,13 +45,13 @@ export function generateRayId(): string {
   return `${hex}-CGK`;
 }
 
-export default function TurnstileGateway({ siteKey, onVerified }: TurnstileGatewayProps) {
+export default function TurnstileGateway({ keys, onVerified }: TurnstileGatewayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
+  const [activeMode, setActiveMode] = useState<'invisible' | 'interactive'>('invisible');
   const [status, setStatus] = useState<'verifying' | 'success' | 'error' | 'script_loading'>('script_loading');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [progressPercent, setProgressPercent] = useState<number>(20);
+  const [progressPercent, setProgressPercent] = useState<number>(25);
 
   const [rayId] = useState<string>(() => {
     const cached = sessionStorage.getItem('cf_ray_id');
@@ -60,93 +65,115 @@ export default function TurnstileGateway({ siteKey, onVerified }: TurnstileGatew
     return '182.253.' + Math.floor(Math.random() * 200 + 10) + '.' + Math.floor(Math.random() * 200 + 10);
   });
 
-  useEffect(() => {
-    let checkInterval: any = null;
-    let progressInterval: any = null;
-    let isMounted = true;
+  const currentSiteKey = activeMode === 'invisible' ? keys.invisible : keys.interactive;
 
-    // Progress animation bar
-    progressInterval = setInterval(() => {
-      setProgressPercent((prev) => {
-        if (prev >= 90) return prev;
-        return prev + Math.floor(Math.random() * 15 + 5);
-      });
-    }, 400);
+  const renderTurnstile = useCallback(() => {
+    if (!window.turnstile || !containerRef.current) return;
 
-    function initTurnstile() {
-      if (!window.turnstile || !containerRef.current) return;
-      if (widgetIdRef.current) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = null;
-      }
-
-      setStatus('verifying');
-      setErrorMessage(null);
-
+    if (widgetIdRef.current) {
       try {
-        const id = window.turnstile.render(containerRef.current, {
-          sitekey: siteKey,
-          theme: 'dark',
-          size: 'invisible',
-          execution: 'auto',
-          appearance: 'always',
-          action: 'rag_mungil_gateway',
-          callback: (receivedToken: string) => {
-            if (!isMounted) return;
-            setToken(receivedToken);
-            setProgressPercent(100);
-            setStatus('success');
-            sessionStorage.setItem('cf_turnstile_token', receivedToken);
-            setTimeout(() => {
-              if (isMounted) {
-                onVerified(receivedToken, rayId);
-              }
-            }, 500);
-          },
-          'error-callback': (err: string) => {
-            if (!isMounted) return;
-            setStatus('error');
-            setErrorMessage(`Cloudflare Turnstile Challenge gagal (${err || 'Kode error'}).`);
-          },
-          'expired-callback': () => {
-            if (!isMounted) return;
-            setStatus('error');
-            setErrorMessage('Sesi verifikasi kadaluarsa. Silakan muat ulang tantangan.');
-          }
-        });
-        widgetIdRef.current = id;
-      } catch (e) {
-        console.error('Turnstile invisible render error:', e);
-        if (isMounted) {
-          setStatus('error');
-          setErrorMessage('Gagal menginisialisasi Cloudflare Invisible Turnstile.');
-        }
-      }
+        window.turnstile.remove(widgetIdRef.current);
+      } catch {}
+      widgetIdRef.current = null;
     }
 
+    // Bersihkan kontainer DOM
+    containerRef.current.innerHTML = '';
+    setStatus('verifying');
+    setErrorMessage(null);
+
+    const isInvisible = activeMode === 'invisible';
+
+    try {
+      const id = window.turnstile.render(containerRef.current, {
+        sitekey: currentSiteKey,
+        theme: 'dark',
+        size: isInvisible ? 'invisible' : 'normal',
+        execution: isInvisible ? 'auto' : 'render',
+        appearance: 'always',
+        action: 'rag_mungil_gateway',
+        callback: (receivedToken: string) => {
+          setProgressPercent(100);
+          setStatus('success');
+          sessionStorage.setItem('cf_turnstile_token', receivedToken);
+          sessionStorage.setItem('cf_turnstile_mode', activeMode);
+          setTimeout(() => {
+            onVerified(receivedToken, rayId, activeMode);
+          }, 500);
+        },
+        'error-callback': (err: string) => {
+          setStatus('error');
+          if (activeMode === 'invisible') {
+            setErrorMessage('Tantangan otomatis memerlukan verifikasi interaktif. Mengalihkan ke mode checklist...');
+            // Otomatis beralih ke mode interaktif jika invisible gagal
+            setTimeout(() => {
+              setActiveMode('interactive');
+            }, 1200);
+          } else {
+            setErrorMessage(`Cloudflare Turnstile Challenge gagal (${err || 'Kode error'}).`);
+          }
+        },
+        'expired-callback': () => {
+          setStatus('error');
+          setErrorMessage('Sesi verifikasi kadaluarsa. Silakan muat ulang.');
+        }
+      });
+      widgetIdRef.current = id;
+    } catch (e) {
+      console.error('Turnstile render error:', e);
+      setStatus('error');
+      setErrorMessage('Gagal memuat widget Cloudflare Turnstile.');
+    }
+  }, [activeMode, currentSiteKey, onVerified, rayId]);
+
+  useEffect(() => {
+    let checkInterval: any = null;
+    let timeoutFallback: any = null;
+
     if (window.turnstile) {
-      initTurnstile();
+      renderTurnstile();
     } else {
       setStatus('script_loading');
       checkInterval = setInterval(() => {
         if (window.turnstile) {
           clearInterval(checkInterval);
-          initTurnstile();
+          renderTurnstile();
         }
       }, 150);
     }
 
+    // Auto-fallback timeout: Jika mode invisible macet > 8 detik, alihkan ke mode interaktif
+    if (activeMode === 'invisible') {
+      timeoutFallback = setTimeout(() => {
+        if (status === 'verifying') {
+          console.warn('Invisible Turnstile timeout fallback -> Switching to Interactive Mode');
+          setActiveMode('interactive');
+        }
+      }, 8000);
+    }
+
     return () => {
-      isMounted = false;
       if (checkInterval) clearInterval(checkInterval);
-      if (progressInterval) clearInterval(progressInterval);
+      if (timeoutFallback) clearTimeout(timeoutFallback);
       if (widgetIdRef.current && window.turnstile) {
         try {
           window.turnstile.remove(widgetIdRef.current);
         } catch {}
       }
     };
-  }, [siteKey, onVerified, rayId]);
+  }, [activeMode, renderTurnstile, status]);
+
+  // Progress animation bar
+  useEffect(() => {
+    const progressInterval = setInterval(() => {
+      setProgressPercent((prev) => {
+        if (prev >= 85) return prev;
+        return prev + Math.floor(Math.random() * 12 + 4);
+      });
+    }, 400);
+
+    return () => clearInterval(progressInterval);
+  }, []);
 
   const handleManualRetry = () => {
     if (widgetIdRef.current && window.turnstile) {
@@ -155,8 +182,14 @@ export default function TurnstileGateway({ siteKey, onVerified }: TurnstileGatew
       setProgressPercent(30);
       setErrorMessage(null);
     } else {
-      window.location.reload();
+      renderTurnstile();
     }
+  };
+
+  const toggleMode = () => {
+    const nextMode = activeMode === 'invisible' ? 'interactive' : 'invisible';
+    setActiveMode(nextMode);
+    setProgressPercent(30);
   };
 
   return (
@@ -176,13 +209,26 @@ export default function TurnstileGateway({ siteKey, onVerified }: TurnstileGatew
               <h2 className="font-catalog-heading text-sm font-semibold tracking-wide text-paper">
                 Cloudflare Managed Gateway
               </h2>
-              <p className="text-[11px] text-paper-dim">RAG-MUNGIL Technical Archive</p>
+              <p className="text-[11px] text-paper-dim">RAG-MUNGIL Security Shield</p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-1 rounded bg-ink-800 text-verdigris border border-ink-700">
-            <span className="w-1.5 h-1.5 rounded-full bg-verdigris animate-ping" />
-            INVISIBLE SHIELD
-          </span>
+          <button
+            onClick={toggleMode}
+            title="Klik untuk beralih mode Turnstile"
+            className="flex items-center gap-1.5 text-[10.5px] font-mono px-2.5 py-1 rounded bg-ink-800 hover:bg-ink-700 text-verdigris border border-ink-700 transition-colors"
+          >
+            {activeMode === 'invisible' ? (
+              <>
+                <ToggleRight className="w-4 h-4 text-verdigris" />
+                <span>MODE: INVISIBLE</span>
+              </>
+            ) : (
+              <>
+                <ToggleLeft className="w-4 h-4 text-oxide" />
+                <span className="text-oxide">MODE: INTERACTIVE</span>
+              </>
+            )}
+          </button>
         </div>
 
         {/* Subtitle Instruksi & Status */}
@@ -191,48 +237,73 @@ export default function TurnstileGateway({ siteKey, onVerified }: TurnstileGatew
             {status === 'success' ? (
               <>
                 <CheckCircle2 className="w-4 h-4 text-verdigris" />
-                <span>Koneksi Aman Terverifikasi</span>
+                <span>Koneksi Aman Terverifikasi! Mengalihkan...</span>
               </>
             ) : status === 'error' ? (
               <>
                 <ShieldAlert className="w-4 h-4 text-oxide" />
-                <span>Tantangan Memerlukan Verifikasi</span>
+                <span>Verifikasi Tambahan Diperlukan</span>
+              </>
+            ) : activeMode === 'invisible' ? (
+              <>
+                <RefreshCw className="w-4 h-4 text-verdigris animate-spin" />
+                <span>Memeriksa Keamanan Koneksi secara Otomatis...</span>
               </>
             ) : (
               <>
-                <RefreshCw className="w-4 h-4 text-verdigris animate-spin" />
-                <span>Memeriksa Keamanan Perangkat & Browser...</span>
+                <ShieldCheck className="w-4 h-4 text-verdigris" />
+                <span>Silakan Centang Kotak Verifikasi Cloudflare di Bawah</span>
               </>
             )}
           </h3>
           <p className="text-[12px] text-paper-dim leading-relaxed">
-            Sistem Cloudflare Turnstile sedang memverifikasi integritas sesi browser Anda secara otomatis tanpa perlu mengisi CAPTCHA manual.
+            {activeMode === 'invisible'
+              ? 'Mode Invisible aktif: Browser Anda diverifikasi secara instan di latar belakang tanpa form CAPTCHA manual.'
+              : 'Mode Interaktif aktif: Silakan klik kotak centang Cloudflare untuk memverifikasi bahwa Anda bukan robot.'}
           </p>
         </div>
 
-        {/* Progress Bar Indikator */}
-        <div className="w-full bg-ink-950 rounded-full h-1.5 mb-5 overflow-hidden border border-ink-800">
-          <div
-            className="bg-verdigris h-1.5 rounded-full transition-all duration-300 ease-out"
-            style={{ width: `${progressPercent}%` }}
-          />
+        {/* Progress Bar Indikator (hanya di mode invisible) */}
+        {activeMode === 'invisible' && status !== 'success' && (
+          <div className="w-full bg-ink-950 rounded-full h-1.5 mb-5 overflow-hidden border border-ink-800">
+            <div
+              className="bg-verdigris h-1.5 rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        )}
+
+        {/* Container untuk Cloudflare Turnstile Widget */}
+        <div className="my-5 flex flex-col items-center justify-center min-h-[70px] bg-ink-950/60 rounded border border-ink-700/80 p-3">
+          <div ref={containerRef} className="flex justify-center" />
+          {status === 'script_loading' && (
+            <div className="flex items-center gap-2 text-[11px] text-paper-dim font-mono py-2">
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-verdigris" />
+              Menghubungkan ke Edge Network Cloudflare...
+            </div>
+          )}
         </div>
 
-        {/* Hidden Container untuk Cloudflare Invisible Turnstile Widget */}
-        <div ref={containerRef} className="flex justify-center my-1" />
-
-        {/* Error Notification */}
+        {/* Error Notification & Manual Switch Prompt */}
         {errorMessage && (
           <div className="mb-4 p-3 bg-oxide/10 border border-oxide/30 rounded text-[12px] text-oxide flex items-start gap-2.5">
             <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
             <div className="flex-1">
               <p>{errorMessage}</p>
-              <button
-                onClick={handleManualRetry}
-                className="mt-1.5 text-[11px] underline font-mono text-paper hover:text-oxide transition-colors"
-              >
-                Coba Ulang Verifikasi Turnstile
-              </button>
+              <div className="mt-1.5 flex items-center gap-3">
+                <button
+                  onClick={handleManualRetry}
+                  className="text-[11px] underline font-mono text-paper hover:text-oxide transition-colors"
+                >
+                  Coba Ulang
+                </button>
+                <button
+                  onClick={toggleMode}
+                  className="text-[11px] underline font-mono text-verdigris hover:text-paper transition-colors"
+                >
+                  Ganti ke Mode {activeMode === 'invisible' ? 'Interaktif (Checkbox)' : 'Invisible (Auto)'}
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -260,14 +331,18 @@ export default function TurnstileGateway({ siteKey, onVerified }: TurnstileGatew
           <div className="flex items-center justify-between border-t border-ink-800/80 pt-1.5">
             <span className="flex items-center gap-1.5">
               <Cpu className="w-3 h-3 text-paper-dim" />
-              Site Key:
+              Active Site Key:
             </span>
-            <span className="truncate max-w-[190px] text-paper-dim/90" title={siteKey}>{siteKey}</span>
+            <span className="truncate max-w-[190px] text-paper-dim/90" title={currentSiteKey}>
+              {currentSiteKey} ({activeMode})
+            </span>
           </div>
 
           <div className="flex items-center justify-between border-t border-ink-800/80 pt-1.5 text-[10px]">
-            <span>Mode Tantangan:</span>
-            <span className="text-verdigris font-semibold">Invisible Zero-Friction Challenge</span>
+            <span>Mekanisme Gateway:</span>
+            <span className="text-verdigris font-semibold">
+              Auto-Adaptive (Invisible → Interactive Fallback)
+            </span>
           </div>
         </div>
 

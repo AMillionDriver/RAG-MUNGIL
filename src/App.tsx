@@ -6,7 +6,10 @@ import CodexBridgeGuide from './components/CodexBridgeGuide';
 import GitHubWorkflowStatus from './components/GitHubWorkflowStatus';
 import TurnstileGateway from './components/TurnstileGateway';
 
-const TURNSTILE_SITE_KEY = '0x4AAAAAADu5H6mpeAoSKieA';
+const TURNSTILE_KEYS = {
+  invisible: '0x4AAAAAADu5H6mpeAoSKieA',
+  interactive: '0x4AAAAAADu46RXWxLxLRnbN',
+};
 
 type ActiveTab = 'catalog' | 'codex' | 'workflow';
 type LoadState = 'loading' | 'ready' | 'error';
@@ -17,6 +20,9 @@ export default function App() {
   });
   const [rayId, setRayId] = useState<string>(() => {
     return sessionStorage.getItem('cf_ray_id') || '';
+  });
+  const [verifiedMode, setVerifiedMode] = useState<'invisible' | 'interactive'>(() => {
+    return (sessionStorage.getItem('cf_turnstile_mode') as any) || 'invisible';
   });
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('catalog');
@@ -53,10 +59,11 @@ export default function App() {
   if (!isVerified) {
     return (
       <TurnstileGateway
-        siteKey={TURNSTILE_SITE_KEY}
-        onVerified={(_token, newRayId) => {
+        keys={TURNSTILE_KEYS}
+        onVerified={(_token, newRayId, mode) => {
           setIsVerified(true);
           setRayId(newRayId);
+          setVerifiedMode(mode);
         }}
       />
     );
@@ -82,7 +89,7 @@ export default function App() {
           <div className="hidden sm:flex items-center gap-2 text-[11px] font-mono bg-ink-950 border border-ink-700 px-2.5 py-1 rounded text-paper-dim">
             <span className="flex items-center gap-1 text-verdigris">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Turnstile Verified</span>
+              <span>Turnstile {verifiedMode === 'invisible' ? 'Auto' : 'Checklist'}</span>
             </span>
             <span className="text-ink-600">|</span>
             <span className="text-paper select-all" title="Cloudflare Ray ID">

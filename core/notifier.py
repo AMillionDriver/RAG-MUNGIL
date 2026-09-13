@@ -2,9 +2,17 @@
 Telegram Notification Engine for RAG-MUNGIL.
 Dispatched from GitHub Actions when new gold-tier techniques are committed.
 Supports graceful fallback if tokens are not configured in repository secrets.
+
+Exit code contract:
+  0 -> notifikasi terkirim sukses, ATAU sengaja di-skip (kredensial belum diisi
+       / tidak ada item baru ronde ini). Kondisi ini bukan error.
+  1 -> notifikasi GAGAL terkirim padahal seharusnya terkirim (kredensial ada,
+       ada item baru, tapi Telegram API menolak/timeout). Ini ditandai gagal
+       supaya GitHub Actions menampilkan status merah, bukan "success" palsu.
 """
 
 import os
+import sys
 import json
 import urllib.request
 import urllib.parse
@@ -98,12 +106,16 @@ def send_telegram_notification(summary_file: str = "harvest_summary.json") -> No
             if resp.status == 200:
                 print(f"✅ Telegram notification sent successfully to chat ID {chat_id}!")
             else:
+                # Status non-200 tanpa exception itu tetep kegagalan pengiriman
                 print(f"⚠️ Telegram API returned status {resp.status}")
+                sys.exit(1)
     except urllib.error.HTTPError as e:
         err_body = e.read().decode("utf-8", errors="ignore")
         print(f"❌ Failed to send Telegram notification (HTTP {e.code}): {err_body}")
+        sys.exit(1)
     except Exception as e:
         print(f"❌ Error sending Telegram notification: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

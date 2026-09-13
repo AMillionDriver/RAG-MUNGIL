@@ -21,7 +21,8 @@
     "github_seeds",
     "github_search",
     "github_org_search",
-    "hackernews"
+    "hackernews",
+    "rss_feeds"
   ],
   "seeds": [
     {
@@ -174,5 +175,8 @@
     "code-423n4",
     "sherlock-audit",
     "foundry-rs"
+  ],
+  "rss_feeds": [
+    "https://blog.trailofbits.com/feed/"
   ]
 }

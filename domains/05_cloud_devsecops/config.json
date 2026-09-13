@@ -22,7 +22,8 @@
     "github_seeds",
     "github_search",
     "github_org_search",
-    "hackernews"
+    "hackernews",
+    "rss_feeds"
   ],
   "seeds": [
     {
@@ -144,5 +145,8 @@
     "prowler-cloud",
     "falcosecurity",
     "kubernetes"
+  ],
+  "rss_feeds": [
+    "https://aws.amazon.com/blogs/security/feed/"
   ]
 }

@@ -56,6 +56,12 @@ def run_github_org_search_adapter(explorer: AutonomousExplorer, http: ResilientH
     print(f"Menyisir repo terbaru dari: {orgs}")
     explorer.explore_github_org_search(orgs)
 
+def run_rss_feeds_adapter(explorer: AutonomousExplorer, http: ResilientHttpClient, config: Dict[str, Any]):
+    feeds = config.get("rss_feeds", [])
+    if not feeds:
+        return
+    explorer.explore_rss_feeds(feeds)
+
 def run_hackernews_adapter(explorer: AutonomousExplorer, http: ResilientHttpClient, config: Dict[str, Any]):
     hn_queries = config.get("hn_queries", [])
     if not hn_queries:
@@ -67,6 +73,7 @@ SOURCE_ADAPTER_REGISTRY = {
     "github_seeds": run_github_seeds_adapter,
     "github_search": run_github_search_adapter,
     "github_org_search": run_github_org_search_adapter,
+    "rss_feeds": run_rss_feeds_adapter,
     "hackernews": run_hackernews_adapter
 }
 

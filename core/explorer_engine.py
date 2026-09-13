@@ -8,6 +8,8 @@ import time
 import urllib.request
 import urllib.error
 import urllib.parse
+import xml.etree.ElementTree as ET
+from email.utils import parsedate_to_datetime
 from datetime import datetime
 from typing import List, Dict, Any, Optional, Tuple
 
@@ -17,6 +19,7 @@ if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 from core.judge_engine import SmartJudgeBot
+from core.html_utils import html_to_text
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -300,6 +303,128 @@ class AutonomousExplorer:
                 probed += 1
                 if probed >= 8:
                     break
+
+    # === Sumber Non-GitHub: Artikel Web via RSS/Atom Feed ===
+    # Prinsip yang sama kayak GitHub: SmartJudgeBot yang sama, ambang batas
+    # sama, dedup engine sama -- cuma medium ambil kontennya beda (HTML,
+    # bukan API JSON), dan sinyal "reputasi"-nya dari trusted_domains, bukan
+    # trusted_orgs. Judge menilai ISI konten, bukan traffic/reputasi situs.
+
+    def process_web_article(self, url: str, title: str, published: str = "", source_domain: str = ""):
+        if url in self.visited_articles or url in self.rejected_items:
+            return
+
+        res = self.http.get(url)
+        if not res or res[0] != 200:
+            self.rejected_items.add(url)
+            return
+
+        content = html_to_text(res[1])
+        if not content:
+            self.rejected_items.add(url)
+            return
+
+        metadata = {
+            "source_domain": source_domain,
+            "pushed_at": published
+        }
+
+        accepted, score, judge_logs = self.judge.evaluate(title=title, content=content, metadata=metadata)
+
+        if not accepted:
+            print(f"⛔ [Judge REJECT] ({score} pts) {url} -> {judge_logs[0] if judge_logs else '-'}")
+            self.rejected_items.add(url)
+            return
+
+        print(f"✨ [Judge ACCEPT] ({score} pts) {url} -> Lolos kurasi Gold!")
+        code_snippets = self.extract_actionable_code_blocks(content)
+
+        record_id = f"{self.domain_id}_web_{abs(hash(url))}"
+        payload = {
+            "id": record_id,
+            "domain": self.domain_id,
+            "title": f"Artikel: {title}",
+            "summary": content[:280].strip(),
+            "content": content[:18000],
+            "source_url": url,
+            "created_at": datetime.utcnow().isoformat() + "Z",
+            "metadata": {
+                "source_type": "web_article",
+                "source_domain": source_domain,
+                "pushed_at": published,
+                "judge_score": score,
+                "judge_verdict": "ACCEPTED",
+                "judge_notes": judge_logs,
+                "code_snippets_count": len(code_snippets),
+                "code_snippets": code_snippets
+            }
+        }
+
+        with open(os.path.join(self.raw_dir, f"{record_id}.json"), "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+
+        self.visited_articles.add(url)
+
+    def explore_rss_feeds(self, feed_urls: List[str]):
+        print("\n--- [Source Adapter: RSS/Atom Feed Sumber Bereputasi] ---")
+        for feed_url in feed_urls:
+            source_domain = urllib.parse.urlparse(feed_url).netloc
+            res = self.http.get(feed_url)
+            if not res or res[0] != 200:
+                print(f"   ⚠️ Gagal ambil feed: {feed_url} (status: {res[0] if res else 'timeout'})")
+                continue
+
+            try:
+                root = ET.fromstring(res[1])
+            except ET.ParseError as e:
+                print(f"   ⚠️ Feed bukan XML valid, dilewati: {feed_url} ({e})")
+                continue
+
+            entries = []
+            # RSS 2.0: <rss><channel><item>...
+            for item in root.findall(".//item"):
+                link_el = item.find("link")
+                title_el = item.find("title")
+                date_el = item.find("pubDate")
+                entries.append((
+                    title_el.text if title_el is not None else "",
+                    link_el.text if link_el is not None else "",
+                    date_el.text if date_el is not None else ""
+                ))
+
+            # Atom: <feed><entry><link href=".."/>...
+            if not entries:
+                ns = {"atom": "http://www.w3.org/2005/Atom"}
+                for entry in root.findall(".//atom:entry", ns):
+                    link_el = entry.find("atom:link", ns)
+                    title_el = entry.find("atom:title", ns)
+                    date_el = entry.find("atom:published", ns) or entry.find("atom:updated", ns)
+                    entries.append((
+                        title_el.text if title_el is not None else "",
+                        link_el.get("href") if link_el is not None else "",
+                        date_el.text if date_el is not None else ""
+                    ))
+
+            print(f"   Feed {source_domain}: {len(entries)} entri ditemukan")
+
+            # Batasi 5 entri terbaru per feed per siklus -- gak perlu borong
+            # semua histori sekaligus, biar API/bandwidth kepake buat feed lain juga.
+            for title, link, raw_date in entries[:5]:
+                if not link:
+                    continue
+
+                published_iso = ""
+                if raw_date:
+                    try:
+                        # RSS pakai format RFC 822 (mis. "Mon, 15 Sep 2025 10:00:00 GMT"),
+                        # beda dari format ISO 8601 yang dipakai Atom & dibaca Judge --
+                        # dikonversi dulu di sini biar recency scoring tetap jalan bener.
+                        dt = parsedate_to_datetime(raw_date)
+                        published_iso = dt.isoformat()
+                    except (TypeError, ValueError):
+                        published_iso = raw_date  # asumsikan udah ISO (kasus Atom)
+
+                self.process_web_article(url=link, title=title, published=published_iso, source_domain=source_domain)
 
     def probe_outbound_repo(self, repo_name: str):
         res = self.http.get(f"https://api.github.com/repos/{repo_name}")

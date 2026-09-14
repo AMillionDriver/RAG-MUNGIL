@@ -1,6 +1,6 @@
 {
   "01_rag_scraping": {
-    "last_updated": "2026-09-14T02:34:55.858399Z",
+    "last_updated": "2026-09-14T09:25:57.735567Z",
     "total_records": 69
   },
   "hashes": [
@@ -203,28 +203,39 @@
     "9e72719f89204c3390ff12f1f9bb2c6cdbc29195d0442ddcbd6f95d7bc09916c",
     "96cf6f516d1b66ba1a1b2ba0d852dbbe6902f4e5ecf2c84db5a6ac8dff3936fd",
     "d1d1750b05cb640bcd2b5c03f0df90cee888f07bb6658dfda6145cd848a342cb",
-    "7e5757035d68513f745d36d45a990bb62f4d3611b5639f0ddea04c2bf1c8f5ae"
+    "7e5757035d68513f745d36d45a990bb62f4d3611b5639f0ddea04c2bf1c8f5ae",
+    "75291f3f2c6dd41560aa0be8a505af0cdf33c5e859f78347c594a2d461e68f72",
+    "2d442c15a28d9fb50a535cd4527fa2c73ff2e4ca1f6214a66bdbf1e815851fed",
+    "5e6e3cca7fa103358ec4c2b65fbd3b19dfd0cf4eb27c889dcfb7937cb6515b6e",
+    "7202ecd5147d9f75f06751792697594db5391c3fd517c55c2b76c3d1aad986d0",
+    "f94bd0bc026337516944bde639dff73aadd6ce24ee0fc3430b70c3dc126995ca",
+    "79e4e50f1b3a7da5fc2382332d82d05d4f5a54873e901676d47348ff5eded767",
+    "00fc707057f57f9b8cda0eacd09057e2a507f80a1376afcbf10d1278fdc9557e",
+    "c6489b0a8a3dfdb024c8b38426efcfe3ec886c8796ec5969602cca916cf7b1fd",
+    "be534c24430df00df8273d7f1c1a43f44c6f9afc9d5615da270d02efc68592a1",
+    "e3d9e1dcf50631ef1afe355995216b9b4a54def72a4428e712647a473e971241",
+    "99affb12ff2477cdd65d5bfe55f5f2bfb73cb939b6d754718c368aa14d7b44ce"
   ],
-  "total_records": 223,
-  "last_sync": "2026-09-14T02:34:55.972681Z",
+  "total_records": 234,
+  "last_sync": "2026-09-14T09:25:57.884988Z",
   "03_ai_agent_security": {
-    "last_updated": "2026-09-14T02:34:55.927425Z",
+    "last_updated": "2026-09-14T09:25:57.854398Z",
     "total_records": 13
   },
   "04_vulnerability_research": {
-    "last_updated": "2026-09-14T02:34:55.932187Z",
+    "last_updated": "2026-09-14T09:25:57.858969Z",
     "total_records": 7
   },
   "05_cloud_devsecops": {
-    "last_updated": "2026-09-14T02:34:55.969883Z",
+    "last_updated": "2026-09-14T09:25:57.882743Z",
     "total_records": 39
   },
   "02_web3_smart_contract": {
-    "last_updated": "2026-09-14T02:34:55.915410Z",
-    "total_records": 83
+    "last_updated": "2026-09-14T09:25:57.843237Z",
+    "total_records": 91
   },
   "06_compiler_errors": {
-    "last_updated": "2026-09-14T02:34:55.972631Z",
-    "total_records": 12
+    "last_updated": "2026-09-14T09:25:57.884946Z",
+    "total_records": 15
   }
 }

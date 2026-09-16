@@ -1,6 +1,6 @@
 {
   "01_rag_scraping": {
-    "last_updated": "2026-09-16T19:15:28.789527Z",
+    "last_updated": "2026-09-16T22:31:40.159786Z",
     "total_records": 76
   },
   "hashes": [
@@ -333,28 +333,34 @@
     "e4c80b000163a0772c8d2ac3fb801ae98b6acf1c7627a02bc4bfea0e0b439e83",
     "05ba373e0f83946e88a6288cffa7d132c0a1f094765293e38bd9f446410cfd1a",
     "56b7a1125e3cb8db2c4d3b3bf1b87e48b979e17ab71fcf98de307de62991b4e9",
-    "4a365ac90c77638ca67e8d3b1de3d8793db5bf40e35339036e8b2a0aa49b1278"
+    "4a365ac90c77638ca67e8d3b1de3d8793db5bf40e35339036e8b2a0aa49b1278",
+    "1c36f3d7ffb6b55ff38c84b25e9201815b8c888adeeca6477ab42e141f0984c2",
+    "c8dfccaefba502d2369b57a25a4449fa31f3972b240f34267eca2bcdc7e61207",
+    "e4dbc1f028b42f6961fdd6a68edacb450476baa9e22f91daec0af8d174f555f1",
+    "cc7847741c429ff62c86983c4067f2feead1eab1206bf2992e794189a63bb25b",
+    "e0d3be95e9f165bff1bc9d27651d352d26a9e332ab868f22481faf15743478b7",
+    "ae82d4f98d9ec55b628ad139a39eae1ed7b2267ef68b054623615137201bf504"
   ],
-  "total_records": 353,
-  "last_sync": "2026-09-16T19:15:28.934947Z",
+  "total_records": 359,
+  "last_sync": "2026-09-16T22:31:40.273358Z",
   "03_ai_agent_security": {
-    "last_updated": "2026-09-16T19:15:28.886691Z",
-    "total_records": 25
+    "last_updated": "2026-09-16T22:31:40.241095Z",
+    "total_records": 26
   },
   "04_vulnerability_research": {
-    "last_updated": "2026-09-16T19:15:28.891712Z",
+    "last_updated": "2026-09-16T22:31:40.244429Z",
     "total_records": 7
   },
   "05_cloud_devsecops": {
-    "last_updated": "2026-09-16T19:15:28.926287Z",
+    "last_updated": "2026-09-16T22:31:40.266396Z",
     "total_records": 54
   },
   "02_web3_smart_contract": {
-    "last_updated": "2026-09-16T19:15:28.858829Z",
-    "total_records": 98
+    "last_updated": "2026-09-16T22:31:40.223414Z",
+    "total_records": 99
   },
   "06_compiler_errors": {
-    "last_updated": "2026-09-16T19:15:28.934805Z",
-    "total_records": 93
+    "last_updated": "2026-09-16T22:31:40.273232Z",
+    "total_records": 97
   }
 }

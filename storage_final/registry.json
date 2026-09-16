@@ -1,6 +1,6 @@
 {
   "01_rag_scraping": {
-    "last_updated": "2026-09-16T02:33:22.847216Z",
+    "last_updated": "2026-09-16T08:59:00.254087Z",
     "total_records": 74
   },
   "hashes": [
@@ -312,28 +312,35 @@
     "3ef76d81c95f7e476424ab8347ee0db18f9c6f57f53a15bcf9d0bd0635c7fc2b",
     "da7434fc613d1fd928c62d2e8cb8ecb0ca01403402d68eade64a7fca8c3220c8",
     "d5c7bc68d49f7a6ae055c49166b1622d29b6381fdff086cf12d062b77b822893",
-    "2b268e493487e5128c758e7109e47f29786dd9faefcb565eaaccccf0e41f1b13"
+    "2b268e493487e5128c758e7109e47f29786dd9faefcb565eaaccccf0e41f1b13",
+    "dc52c4bdbf00390e867c01b027e3e6023e0dbb24b7fc2d7a301a5c12d5cf3143",
+    "dfa1abd96a258818d6b3965c5c94fbdc1c54779270c1de6e99507cf6d1db1f4e",
+    "f3fbbf8d31b3465c568102d54435283c20109eeede3de87ff3a87683da9cffc6",
+    "864d2f382601aab2d337be010265eb9c8908c61c90351f7b5e1c7fef72858a21",
+    "c6eaf859c932910735567a94a6e66f837a5042f6865ab2a591883aca581b7d3e",
+    "081f8c200188555dff10ffb2f41ee2f7ab70984dd713d880c80d74ab32e4611e",
+    "b6a35b149a46f75e7e477f0f5a68645963c3367f1f10b3ab2e76f7a57f69e8f3"
   ],
-  "total_records": 332,
-  "last_sync": "2026-09-16T02:33:22.986042Z",
+  "total_records": 339,
+  "last_sync": "2026-09-16T08:59:00.341678Z",
   "03_ai_agent_security": {
-    "last_updated": "2026-09-16T02:33:22.939359Z",
+    "last_updated": "2026-09-16T08:59:00.313246Z",
     "total_records": 20
   },
   "04_vulnerability_research": {
-    "last_updated": "2026-09-16T02:33:22.944293Z",
+    "last_updated": "2026-09-16T08:59:00.315917Z",
     "total_records": 7
   },
   "05_cloud_devsecops": {
-    "last_updated": "2026-09-16T02:33:22.976975Z",
+    "last_updated": "2026-09-16T08:59:00.333908Z",
     "total_records": 53
   },
   "02_web3_smart_contract": {
-    "last_updated": "2026-09-16T02:33:22.917332Z",
-    "total_records": 97
+    "last_updated": "2026-09-16T08:59:00.303397Z",
+    "total_records": 98
   },
   "06_compiler_errors": {
-    "last_updated": "2026-09-16T02:33:22.985912Z",
-    "total_records": 81
+    "last_updated": "2026-09-16T08:59:00.341549Z",
+    "total_records": 87
   }
 }

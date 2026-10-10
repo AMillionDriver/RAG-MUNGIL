@@ -7,6 +7,36 @@ Dataset yang dihasilkan disimpan dalam format **Clean JSONL** dengan skema *Fixe
 
 ---
 
+## 🤖 Pintu Akses AI Agent (Model Context Protocol / MCP)
+
+Kini AI Agent modern (**Claude Desktop**, **Cursor IDE**, **Windsurf**, dll.) dapat terhubung langsung ke dataset **RAG-MUNGIL** secara instan tanpa perlu mengklon repositori:
+
+### ⚡ 1-Baris Setup Otomatis (Zero-Clone):
+```bash
+npx -y rag-mungil-mcp --install
+```
+*Script ini otomatis mendeteksi dan mengonfigurasi Claude Desktop & Cursor IDE pada komputer Anda.*
+
+### 🛠️ Manual Config (Cursor & Claude Desktop):
+Tambahkan ke `.cursor/mcp.json` atau `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "rag-mungil": {
+      "command": "npx",
+      "args": ["-y", "rag-mungil-mcp"]
+    }
+  }
+}
+```
+
+### 🧰 Tools yang Disediakan untuk Agen:
+1. `search_knowledge_base`: Hybrid search (BM25 + Semantic Vector) ke seluruh domain teknis.
+2. `get_domain_topics`: Informasi ringkas domain aktif dan kata kunci pencarian.
+3. `fetch_record_details`: Penarikan full content markdown, metadata, dan source code utuh.
+4. `get_code_pocs`: Filter khusus untuk mengekstrak script PoC nyata (`forge test`, Playwright/curl-cffi stealth).
+
+
 ## 📊 Status Dataset Saat Ini
 
 | Domain ID | Topik & Cakupan | Total Records | Status Kurasi | File Path |

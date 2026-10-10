@@ -1,0 +1,28 @@
+# RAG-MUNGIL
+
+> Autonomous Dataset Harvester for RAG-Ready Technical Corpora.
+> Repository: https://github.com/AMillionDriver/RAG-MUNGIL
+> MCP Server: npx -y rag-mungil-mcp
+
+## Overview
+RAG-MUNGIL continuously crawls, curates, and validates deep technical knowledge in Clean JSONL format with fixed core and dynamic metadata schemas. It serves as an authoritative ground-truth knowledge base for AI Agents and RAG systems.
+
+## Integration for AI Agents
+- Run MCP Server: `npx -y rag-mungil-mcp`
+- Automatic Setup for Claude & Cursor: `npx -y rag-mungil-mcp --install`
+- Tools available: `search_knowledge_base`, `get_domain_topics`, `fetch_record_details`, `get_code_pocs`
+
+## Curated Technical Domains
+- [01_rag_scraping](https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main/domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl): Web Scraping, TLS/JA4 Evasion, Anti-Bot Bypass (curl-cffi, camoufox, Cloudflare Turnstile).
+- [02_web3_smart_contract](https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main/domains/02_web3_smart_contract/data/02_web3_smart_contract_clean.jsonl): Web3 Security, Smart Contract Audits, Foundry PoCs (Reentrancy, Read-Only Reentrancy, Flash Loans).
+
+## Data Schema
+Each record follows:
+- `id`: Unique slug identifier
+- `domain`: Domain folder key
+- `title`: Canonical technical title
+- `summary`: Concise multi-sentence summary
+- `content`: Markdown-formatted technical deep-dive with code blocks
+- `source_url`: Verifiable origin URL
+- `created_at`: ISO 8601 timestamp
+- `metadata`: Domain-specific signals (stars, repo_name, bypassed_wafs, vuln_type, code_snippets)

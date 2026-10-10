@@ -1,19 +1,26 @@
 import { z } from 'zod';
 import { loadAllCorpusRecords } from '../loader/corpus-loader.js';
+import { validateQuery } from '../security/guard.js';
+import { sanitizeAgentOutput } from '../security/sanitizer.js';
 
 export const pocsToolSchema = {
   name: 'get_code_pocs',
   description:
-    'Extracts raw, ready-to-run Proof-of-Concept (PoC) code snippets and test suites (e.g., Solidity Foundry forge-test, Python Playwright/curl-cffi evasion scripts) matching a topic.',
+    'Extracts raw, ready-to-run Proof-of-Concept (PoC) code snippets and test suites (e.g., Solidity Foundry forge-test, Python Playwright/curl-cffi evasion scripts) matching a topic. Hardened against malicious injection payloads.',
   parameters: z.object({
-    topic: z.string().describe('Target keyword or vulnerability pattern (e.g. "reentrancy", "turnstile", "oracle")'),
+    topic: z
+      .string()
+      .max(500, 'Topic length cannot exceed 500 characters.')
+      .describe('Target keyword or vulnerability pattern (e.g. "reentrancy", "turnstile", "oracle")'),
     domain: z.enum(['all', '01_rag_scraping', '02_web3_smart_contract']).optional().default('all'),
   }),
 };
 
 export async function handlePocsTool(args: z.infer<typeof pocsToolSchema.parameters>) {
+  // Security Layer 1: Bound topic input
+  const safeTopic = validateQuery(args.topic, 500).toLowerCase();
+
   const records = await loadAllCorpusRecords();
-  const lowerTopic = args.topic.toLowerCase();
 
   const matched = records.filter((r) => {
     if (args.domain !== 'all' && r.domain !== args.domain) return false;
@@ -21,7 +28,7 @@ export async function handlePocsTool(args: z.infer<typeof pocsToolSchema.paramet
     if (!hasCode) return false;
 
     const fullText = `${r.title} ${r.summary} ${r.content} ${r.metadata?.vuln_type || ''}`.toLowerCase();
-    return fullText.includes(lowerTopic);
+    return fullText.includes(safeTopic);
   });
 
   if (matched.length === 0) {
@@ -35,12 +42,13 @@ export async function handlePocsTool(args: z.infer<typeof pocsToolSchema.paramet
     };
   }
 
+  // Security Layer 4: Output Sanitization
   const results = matched.map((m) => ({
     id: m.id,
-    title: m.title,
+    title: sanitizeAgentOutput(m.title),
     source_url: m.source_url,
-    snippets: m.metadata?.code_snippets || [],
-    markdown_content: m.content,
+    snippets: (m.metadata?.code_snippets || []).map((s) => sanitizeAgentOutput(s)),
+    markdown_content: sanitizeAgentOutput(m.content),
   }));
 
   return {

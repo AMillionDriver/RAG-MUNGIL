@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import type { CorpusRecord, DomainInfo } from '../types.js';
+import { verifyUrlAllowed } from '../security/integrity.js';
+import { validateSafeIdentifier } from '../security/guard.js';
 
 const GITHUB_RAW_BASE =
   'https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main';
@@ -32,6 +34,9 @@ export async function loadAllCorpusRecords(): Promise<CorpusRecord[]> {
   const cacheDir = path.join(os.homedir(), '.cache', 'rag-mungil');
 
   for (const [domainId, def] of Object.entries(DOMAIN_DEFINITIONS)) {
+    // Validate domainId is a safe identifier
+    validateSafeIdentifier(domainId, 'Domain ID');
+
     let content: string | null = null;
 
     // 1. Check local repo relative paths
@@ -66,17 +71,20 @@ export async function loadAllCorpusRecords(): Promise<CorpusRecord[]> {
       }
     }
 
-    // 3. Remote fetch from GitHub Raw
+    // 3. Remote fetch with strict URL verification
     if (!content) {
       try {
-        const url = `${GITHUB_RAW_BASE}/${def.file}`;
-        const res = await fetch(url);
+        const rawUrl = `${GITHUB_RAW_BASE}/${def.file}`;
+        // Enforce SSRF & Domain Whitelist
+        const verifiedUrl = verifyUrlAllowed(rawUrl);
+
+        const res = await fetch(verifiedUrl.toString());
         if (res.ok) {
           content = await res.text();
-          // Write to cache
+          // Write to secure user cache
           try {
-            fs.mkdirSync(cacheDir, { recursive: true });
-            fs.writeFileSync(domainCacheFile, content, 'utf-8');
+            fs.mkdirSync(cacheDir, { recursive: true, mode: 0o700 });
+            fs.writeFileSync(domainCacheFile, content, { encoding: 'utf-8', mode: 0o600 });
           } catch {
             // cache write failure is non-fatal
           }

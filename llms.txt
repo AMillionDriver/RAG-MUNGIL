@@ -16,7 +16,7 @@ RAG-MUNGIL continuously crawls, curates, and validates deep technical knowledge 
 - Automatic Setup for Claude & Cursor: `npx -y rag-mungil-mcp --install`
 - Tools available: `search_knowledge_base`, `get_domain_topics`, `fetch_record_details`, `get_code_pocs`
 
-## Curated Technical Domains (8 Active Domains)
+## Curated Technical Domains (9 Active Domains)
 - [01_rag_scraping](https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main/domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl): Web Scraping, TLS/JA4 Evasion, Anti-Bot Bypass (curl-cffi, camoufox, Cloudflare Turnstile).
 - [02_web3_smart_contract](https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main/domains/02_web3_smart_contract/data/02_web3_smart_contract_clean.jsonl): Web3 Security, Smart Contract Audits, Foundry PoCs (Reentrancy, Read-Only Reentrancy, Flash Loans).
 - [03_ai_agent_security](https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main/domains/03_ai_agent_security/data/03_ai_agent_security_clean.jsonl): AI Agent Security, Prompt Injection Mitigation, MCP Security, LLM Red-Teaming.
@@ -25,6 +25,7 @@ RAG-MUNGIL continuously crawls, curates, and validates deep technical knowledge 
 - [06_compiler_errors](https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main/domains/06_compiler_errors/data/06_compiler_errors_clean.jsonl): Compiler Error Diagnostics, Linker Error Resolutions, Rust Borrow Checker, Type Mismatch.
 - [07_binary_analysis_forensics](https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main/domains/07_binary_analysis_forensics/data/07_binary_analysis_forensics_clean.jsonl): Binary Analysis, Frida Dynamic Instrumentation, Ghidra Headless Scripting, BinDiff Patch Analysis.
 - [08_captcha_automation_solver](https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main/domains/08_captcha_automation_solver/data/08_captcha_automation_solver_clean.jsonl): CAPTCHA Automation, Faster-Whisper Audio Transcription, YOLOv8 Grid Detection, OpenCV Slider Matching, ddddocr.
+- [09_captcha_architectures_evolution](https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main/domains/09_captcha_architectures_evolution/data/09_captcha_architectures_evolution_clean.jsonl): CAPTCHA Architectures (v1-v3), Cloudflare Turnstile WASM PoW, hCaptcha Privacy, Server-Side Token Verification Protocols.
 
 ## Documentation References
 - [Agent Guidelines](https://github.com/AMillionDriver/RAG-MUNGIL/blob/main/AGENTGUIDELINE.md)

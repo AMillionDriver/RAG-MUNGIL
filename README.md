@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
-[![Domains: 7 Active](https://img.shields.io/badge/Domains-8%20Active-orange.svg)](#-status-dataset-saat-ini-7-domain-aktif)
+[![Domains: 7 Active](https://img.shields.io/badge/Domains-9%20Active-orange.svg)](#-status-dataset-saat-ini-7-domain-aktif)
 
 ---
 
@@ -44,14 +44,14 @@ Tambahkan entri berikut ke `.cursor/mcp.json` atau `claude_desktop_config.json`:
 ```
 
 ### 🧰 Tools yang Disediakan untuk Agen:
-1. **`search_knowledge_base`**: Hybrid search (BM25 + Dense Semantic Vector) ke seluruh 8 domain teknis.
+1. **`search_knowledge_base`**: Hybrid search (BM25 + Dense Semantic Vector) ke seluruh 9 domain teknis.
 2. **`get_domain_topics`**: Informasi ringkas domain aktif, statistik records, dan kata kunci panduan.
 3. **`fetch_record_details`**: Penarikan full content markdown, metadata, dan source code utuh berdasarkan ID record.
 4. **`get_code_pocs`**: Filter khusus untuk mengekstrak script PoC nyata (`forge test`, Playwright/curl-cffi stealth, Frida native hooks).
 
 ---
 
-## 📊 Status Dataset Saat Ini (8 Domain Aktif)
+## 📊 Status Dataset Saat Ini (9 Domain Aktif)
 
 | Domain ID | Topik & Cakupan | Status Kurasi | File Path |
 | :--- | :--- | :---: | :--- |
@@ -63,6 +63,7 @@ Tambahkan entri berikut ke `.cursor/mcp.json` atau `claude_desktop_config.json`:
 | `06_compiler_errors` | Compiler Error Diagnostics, Linker Error Fixes, Rust Borrow Checker | Gold Tier | `domains/06_compiler_errors/data/06_compiler_errors_clean.jsonl` |
 | `07_binary_analysis_forensics` | Binary Analysis, Frida Dynamic Instrumentation, Ghidra Forensics | Gold Tier | `domains/07_binary_analysis_forensics/data/07_binary_analysis_forensics_clean.jsonl` |
 | `08_captcha_automation_solver` | CAPTCHA Automation, Computer Vision & Audio-AI Solvers | Gold Tier | `domains/08_captcha_automation_solver/data/08_captcha_automation_solver_clean.jsonl` |
+| `09_captcha_architectures_evolution` | CAPTCHA Architectures (v1-v3), Turnstile, hCaptcha, Token Protocols | Gold Tier | `domains/09_captcha_architectures_evolution/data/09_captcha_architectures_evolution_clean.jsonl` |
 
 > *Catatan: Semua records melalui validasi deduplikasi SHA-256 dan fuzzy Jaccard similarity.*
 
@@ -83,7 +84,7 @@ RAG-MUNGIL/
 │   ├── explorer_engine.py      # Resilient Client & Git Tree API Source Fetcher
 │   ├── judge_engine.py         # Heuristic Judge Bot (Recency, Code Verification, Anti-Spam Gate)
 │   └── add_domain.py           # CLI Scaffolder untuk menambah domain baru secara instan
-├── domains/                    # Domain Plugins (Deklaratif 7 Domain)
+├── domains/                    # Domain Plugins (Deklaratif 9 Domain)
 │   ├── 01_rag_scraping/
 │   ├── 02_web3_smart_contract/
 │   ├── 03_ai_agent_security/
@@ -91,7 +92,8 @@ RAG-MUNGIL/
 │   ├── 05_cloud_devsecops/
 │   ├── 06_compiler_errors/
 │   ├── 07_binary_analysis_forensics/
-│   └── 08_captcha_automation_solver/
+│   ├── 08_captcha_automation_solver/
+│   └── 09_captcha_architectures_evolution/
 ├── packages/
 │   └── mcp-server/             # Model Context Protocol (MCP) Server (TypeScript)
 │       ├── src/                # Hybrid Search, Tools, Resources, Prompts & Security

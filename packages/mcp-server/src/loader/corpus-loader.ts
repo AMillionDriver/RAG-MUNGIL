@@ -60,6 +60,12 @@ export const DOMAIN_DEFINITIONS: Record<
     description: 'Speech-to-text audio challenge transcription via Faster-Whisper, YOLOv8 grid object detection, OpenCV slider puzzle matching, and ddddocr text preprocessing.',
     keywords: ['captcha', 'whisper', 'faster-whisper', 'yolov8', 'ddddocr', 'opencv', 'template matching', 'slider puzzle', 'recaptcha', 'hcaptcha'],
   },
+  '09_captcha_architectures_evolution': {
+    file: 'domains/09_captcha_architectures_evolution/data/09_captcha_architectures_evolution_clean.jsonl',
+    name: 'CAPTCHA Architectures, Evolution (v1-v3) & Token Exchange Protocols',
+    description: 'reCAPTCHA v2 vs v3 risk scoring comparison, Cloudflare Turnstile WASM Proof-of-Work, hCaptcha privacy dynamic scaling, and server-side siteverify token protocols.',
+    keywords: ['recaptcha v2', 'recaptcha v3', 'turnstile', 'hcaptcha', 'siteverify', 'risk score', 'proof of work', 'wasm pow', 'step-up challenge'],
+  },
 };
 
 let cachedRecords: CorpusRecord[] | null = null;

@@ -66,6 +66,18 @@ const mockCorpus: CorpusRecord[] = [
       tool: 'faster-whisper',
     },
   },
+  {
+    id: 'test_6',
+    domain: '09_captcha_architectures_evolution',
+    title: 'reCAPTCHA v2 vs v3 Architecture & Siteverify Protocol',
+    summary: 'Architectural comparison between v2 interactive checkbox and v3 invisible risk score 0.0 to 1.0.',
+    content: 'reCAPTCHA v3 invisible risk score 0.0 to 1.0 siteverify token lifecycle',
+    source_url: 'https://developers.google.com/recaptcha/docs/versions',
+    created_at: '2026-10-10T19:00:00Z',
+    metadata: {
+      provider: 'Google reCAPTCHA',
+    },
+  },
 ];
 
 describe('Hybrid Retrieval Engine', () => {
@@ -127,6 +139,20 @@ describe('Hybrid Retrieval Engine', () => {
     expect(results.length).toBe(1);
     expect(results[0].record.id).toBe('test_5');
     expect(results[0].record.domain).toBe('08_captcha_automation_solver');
+  });
+
+  it('searches and filters Domain 09 captcha architecture records correctly', () => {
+    const hybrid = new HybridRetrievalEngine();
+    hybrid.index(mockCorpus);
+
+    const results = hybrid.search('recaptcha v3 risk score siteverify', {
+      domain: '09_captcha_architectures_evolution',
+      mode: 'hybrid',
+    });
+
+    expect(results.length).toBe(1);
+    expect(results[0].record.id).toBe('test_6');
+    expect(results[0].record.domain).toBe('09_captcha_architectures_evolution');
   });
 
   it('respects domain filter correctly', () => {

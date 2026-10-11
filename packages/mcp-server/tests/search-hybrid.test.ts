@@ -54,6 +54,18 @@ const mockCorpus: CorpusRecord[] = [
       tool: 'Frida',
     },
   },
+  {
+    id: 'test_5',
+    domain: '08_captcha_automation_solver',
+    title: 'Faster-Whisper Audio CAPTCHA Accessibility Solver',
+    summary: 'Speech-to-text audio challenge transcription using faster-whisper model.',
+    content: 'from faster_whisper import WhisperModel\nmodel = WhisperModel("base", device="cpu")',
+    source_url: 'https://github.com/SYSTRAN/faster-whisper',
+    created_at: '2026-10-10T18:00:00Z',
+    metadata: {
+      tool: 'faster-whisper',
+    },
+  },
 ];
 
 describe('Hybrid Retrieval Engine', () => {
@@ -101,6 +113,20 @@ describe('Hybrid Retrieval Engine', () => {
     expect(results.length).toBe(1);
     expect(results[0].record.id).toBe('test_4');
     expect(results[0].record.domain).toBe('07_binary_analysis_forensics');
+  });
+
+  it('searches and filters Domain 08 captcha solver records correctly', () => {
+    const hybrid = new HybridRetrievalEngine();
+    hybrid.index(mockCorpus);
+
+    const results = hybrid.search('whisper audio captcha', {
+      domain: '08_captcha_automation_solver',
+      mode: 'hybrid',
+    });
+
+    expect(results.length).toBe(1);
+    expect(results[0].record.id).toBe('test_5');
+    expect(results[0].record.domain).toBe('08_captcha_automation_solver');
   });
 
   it('respects domain filter correctly', () => {

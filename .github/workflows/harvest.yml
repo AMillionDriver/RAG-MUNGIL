@@ -26,6 +26,7 @@ jobs:
           - 05_cloud_devsecops
           - 06_compiler_errors
           - 07_binary_analysis_forensics
+          - 08_captcha_automation_solver
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

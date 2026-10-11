@@ -1,0 +1,71 @@
+{
+  "domain_id": "08_captcha_automation_solver",
+  "domain_label": "CAPTCHA Automation, Computer Vision & Audio-AI Solvers",
+  "accept_threshold": 75,
+  "min_word_count": 100,
+  "code_over_text_tolerance": true,
+  "scoring_strategy": {
+    "recency_sensitive": false,
+    "evergreen_bonus": true
+  },
+  "ingestion_targets": {
+    "primary": "README.md",
+    "source_file_patterns": [
+      "*.py",
+      "*.js",
+      "*.ts",
+      "*.json",
+      "*.sh"
+    ]
+  },
+  "enabled_sources": [
+    "github_search",
+    "curated_seeds",
+    "hacker_news"
+  ],
+  "target_keywords": [
+    "captcha solver",
+    "audio challenge",
+    "whisper",
+    "faster-whisper",
+    "speech-to-text",
+    "yolov8",
+    "object detection",
+    "ddddocr",
+    "tesseract ocr",
+    "opencv",
+    "matchtemplate",
+    "slider captcha",
+    "puzzle offset",
+    "bezier curve",
+    "recaptcha v2",
+    "hcaptcha",
+    "turnstile",
+    "playwright stealth",
+    "token injection"
+  ],
+  "weights": {
+    "primary_keyword": 30,
+    "secondary_keyword": 15,
+    "code_snippet": 25,
+    "technical_depth": 20,
+    "freshness": 10
+  },
+  "signature_phrases": [
+    "faster_whisper",
+    "whisper.load_model",
+    "ddddocr.DdddOcr",
+    "cv2.matchTemplate",
+    "TM_CCOEFF_NORMED",
+    "YOLO('yolov8",
+    "recaptcha",
+    "hcaptcha",
+    "audio challenge"
+  ],
+  "curated_seeds": [
+    "https://github.com/sml2h3/ddddocr",
+    "https://github.com/SYSTRAN/faster-whisper",
+    "https://github.com/ultralytics/ultralytics",
+    "https://github.com/berstend/puppeteer-extra"
+  ]
+}

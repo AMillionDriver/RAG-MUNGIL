@@ -37,14 +37,15 @@ RAG-MUNGIL/
 │   ├── explorer_engine.py      # Resilient client & Git Tree API fetcher
 │   ├── judge_engine.py         # Heuristic scoring bot (anti-spam gate)
 │   └── add_domain.py           # CLI domain generator (`python -m core.add_domain`)
-├── domains/                    # Domain knowledge plugins (7 Active Domains)
+├── domains/                    # Domain knowledge plugins (8 Active Domains)
 │   ├── 01_rag_scraping/        # Web Scraping & Anti-Bot Evasion
 │   ├── 02_web3_smart_contract/ # Web3 & Smart Contract Security
 │   ├── 03_ai_agent_security/   # AI Agent Security & LLM Guardrails
 │   ├── 04_vulnerability_research/ # Software Vulnerability Root Cause (C/C++)
 │   ├── 05_cloud_devsecops/     # Cloud Security Hardening & DevSecOps
 │   ├── 06_compiler_errors/     # Compiler & Linker Error Diagnostics
-│   └── 07_binary_analysis_forensics/ # Binary Analysis, Frida & Ghidra Forensics
+│   ├── 07_binary_analysis_forensics/ # Binary Analysis, Frida & Ghidra Forensics
+│   └── 08_captcha_automation_solver/ # CAPTCHA Automation, Computer Vision & Audio-AI
 └── packages/
     └── mcp-server/             # Model Context Protocol (MCP) TypeScript Server
         ├── bin/                # Executable CLI (`npx -y rag-mungil-mcp`)
@@ -54,7 +55,7 @@ RAG-MUNGIL/
 
 ---
 
-## 🧭 3. The 7 Curated Technical Domains (Trigger Matrix)
+## 🧭 3. The 8 Curated Technical Domains (Trigger Matrix)
 
 Use this lookup matrix to determine which domain to query based on user prompts:
 
@@ -67,6 +68,7 @@ Use this lookup matrix to determine which domain to query based on user prompts:
 | **`05_cloud_devsecops`** | Terraform, Kubernetes RBAC, container escape, IAM policy, CI/CD pipeline security | User is securing cloud infrastructure, auditing Helm charts, hardening Dockerfiles, or writing Terraform rules. |
 | **`06_compiler_errors`** | Rust borrow checker, GCC/Clang linker errors, undefined reference, type mismatch | User encounters compilation or linker errors and needs exact diagnostic resolution recipes. |
 | **`07_binary_analysis_forensics`**| Frida native hooks (`Interceptor.attach`), Ghidra headless scripts, BinDiff, patch diffing | User is reverse-engineering binaries, writing runtime instrumentation scripts, or performing patch forensics. |
+| **`08_captcha_automation_solver`**| Faster-Whisper audio challenge, YOLOv8 image grid detection, OpenCV slider gap matching, ddddocr | User needs to solve or test CAPTCHA challenges in QA automation, preprocess distorted images, or transcribe accessibility audio. |
 
 ---
 
@@ -136,7 +138,7 @@ When acting on this repository or using its data:
 
 Bagi pengembang atau agen yang berinteraksi dalam Bahasa Indonesia:
 - **Tujuan Repositori**: RAG-MUNGIL adalah gudang dataset teknis berkualitas tinggi (*Gold-Tier*) yang dikurasi secara otomatis untuk menjadi basis pengetahuan (RAG) bagi AI Agent agar tidak berhalusinasi.
-- **7 Domain Aktif**: Meliputi Web Scraping/Anti-Bot (`01`), Smart Contract Security (`02`), Keamanan AI Agent (`03`), Analisis Root Cause Bug (`04`), Cloud & DevSecOps (`05`), Diagnostik Error Compiler (`06`), dan Analisis Biner/Frida/Ghidra (`07`).
+- **8 Domain Aktif**: Meliputi Web Scraping/Anti-Bot (`01`), Smart Contract Security (`02`), Keamanan AI Agent (`03`), Analisis Root Cause Bug (`04`), Cloud & DevSecOps (`05`), Diagnostik Error Compiler (`06`), Analisis Biner/Frida/Ghidra (`07`), dan CAPTCHA Automation/Vision/Audio-AI (`08`).
 - **Cara Pemakaian Termudah**: Cukup pasang MCP Server di Cursor atau Claude Desktop dengan perintah:
   ```bash
   npx -y rag-mungil-mcp --install

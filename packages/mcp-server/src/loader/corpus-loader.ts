@@ -54,6 +54,12 @@ export const DOMAIN_DEFINITIONS: Record<
     description: 'Frida dynamic instrumentation hooks, Ghidra headless decompilation scripts, BinDiff N-day patch analysis, and binary reversing.',
     keywords: ['frida', 'interceptor', 'ghidra', 'flatprogramapi', 'bindiff', 'patch analysis', 'disassembly', 'reverse engineering'],
   },
+  '08_captcha_automation_solver': {
+    file: 'domains/08_captcha_automation_solver/data/08_captcha_automation_solver_clean.jsonl',
+    name: 'CAPTCHA Automation, Computer Vision & Audio-AI Solvers',
+    description: 'Speech-to-text audio challenge transcription via Faster-Whisper, YOLOv8 grid object detection, OpenCV slider puzzle matching, and ddddocr text preprocessing.',
+    keywords: ['captcha', 'whisper', 'faster-whisper', 'yolov8', 'ddddocr', 'opencv', 'template matching', 'slider puzzle', 'recaptcha', 'hcaptcha'],
+  },
 };
 
 let cachedRecords: CorpusRecord[] | null = null;

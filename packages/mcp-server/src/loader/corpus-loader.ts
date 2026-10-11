@@ -8,7 +8,10 @@ import { validateSafeIdentifier } from '../security/guard.js';
 const GITHUB_RAW_BASE =
   'https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main';
 
-const DOMAIN_DEFINITIONS: Record<string, { file: string; name: string; description: string; keywords: string[] }> = {
+export const DOMAIN_DEFINITIONS: Record<
+  string,
+  { file: string; name: string; description: string; keywords: string[] }
+> = {
   '01_rag_scraping': {
     file: 'domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl',
     name: 'Web Scraping & Anti-Bot Evasion',
@@ -20,6 +23,36 @@ const DOMAIN_DEFINITIONS: Record<string, { file: string; name: string; descripti
     name: 'Web3 & Smart Contract Security',
     description: 'Foundry exploit reproduction tests, reentrancy vulnerabilities, read-only reentrancy, flash loans, and Code4rena audit findings.',
     keywords: ['foundry', 'forge test', 'reentrancy', 'flash loan', 'read-only reentrancy', 'curve', 'audit', 'solidity'],
+  },
+  '03_ai_agent_security': {
+    file: 'domains/03_ai_agent_security/data/03_ai_agent_security_clean.jsonl',
+    name: 'AI Agent Security & LLM Guardrails',
+    description: 'Prompt injection defense, tool shadowing mitigation, MCP security, adversarial jailbreak evasion, and agentic red-teaming.',
+    keywords: ['prompt injection', 'jailbreak', 'mcp security', 'guardrails', 'red-team', 'owasp llm', 'agentic safety'],
+  },
+  '04_vulnerability_research': {
+    file: 'domains/04_vulnerability_research/data/04_vulnerability_research_clean.jsonl',
+    name: 'Software Security & Vulnerability Root Cause Analysis',
+    description: 'Memory corruption, use-after-free, heap overflow, race conditions, C/C++ root cause analysis, and CVE triage.',
+    keywords: ['memory corruption', 'use-after-free', 'heap overflow', 'cve', 'root cause', 'buffer overflow', 'sanitizer'],
+  },
+  '05_cloud_devsecops': {
+    file: 'domains/05_cloud_devsecops/data/05_cloud_devsecops_clean.jsonl',
+    name: 'Cloud Security Hardening & DevSecOps',
+    description: 'Terraform misconfigurations, Kubernetes RBAC hardening, container escape defenses, AWS/GCP IAM security, and CI/CD pipelines.',
+    keywords: ['kubernetes', 'terraform', 'rbac', 'iam', 'container escape', 'devsecops', 'cloud hardening', 'docker'],
+  },
+  '06_compiler_errors': {
+    file: 'domains/06_compiler_errors/data/06_compiler_errors_clean.jsonl',
+    name: 'Compiler Error Diagnostics',
+    description: 'Compilation error resolution patterns, linker errors, type mismatch fixes, Rust borrow checker solutions, and GCC/Clang triage.',
+    keywords: ['compiler error', 'linker error', 'rust borrow checker', 'gcc', 'clang', 'type mismatch', 'syntax error'],
+  },
+  '07_binary_analysis_forensics': {
+    file: 'domains/07_binary_analysis_forensics/data/07_binary_analysis_forensics_clean.jsonl',
+    name: 'Binary Analysis, Frida Instrumentation & Ghidra Forensics',
+    description: 'Frida dynamic instrumentation hooks, Ghidra headless decompilation scripts, BinDiff N-day patch analysis, and binary reversing.',
+    keywords: ['frida', 'interceptor', 'ghidra', 'flatprogramapi', 'bindiff', 'patch analysis', 'disassembly', 'reverse engineering'],
   },
 };
 

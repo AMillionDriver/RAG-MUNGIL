@@ -1,0 +1,73 @@
+{
+  "domain_id": "07_binary_analysis_forensics",
+  "domain_label": "Binary Analysis, Frida Instrumentation & Ghidra Forensics",
+  "accept_threshold": 75,
+  "min_word_count": 100,
+  "code_over_text_tolerance": true,
+  "scoring_strategy": {
+    "recency_sensitive": false,
+    "evergreen_bonus": true
+  },
+  "ingestion_targets": {
+    "primary": "README.md",
+    "source_file_patterns": [
+      "*.js",
+      "*.ts",
+      "*.py",
+      "*.java",
+      "*.c",
+      "*.cpp",
+      "*.asm",
+      "*.s"
+    ]
+  },
+  "enabled_sources": [
+    "github_search",
+    "curated_seeds",
+    "hacker_news"
+  ],
+  "target_keywords": [
+    "frida",
+    "interceptor.attach",
+    "nativehook",
+    "ghidra",
+    "flatprogramapi",
+    "decompinterface",
+    "p-code",
+    "bindiff",
+    "patch diffing",
+    "disassembly",
+    "decompiler",
+    "reverse engineering",
+    "elf format",
+    "mach-o",
+    "pe header",
+    "xrefs",
+    "symbol table",
+    "arm64 abi"
+  ],
+  "weights": {
+    "primary_keyword": 30,
+    "secondary_keyword": 15,
+    "code_snippet": 25,
+    "technical_depth": 20,
+    "freshness": 10
+  },
+  "signature_phrases": [
+    "Interceptor.attach",
+    "FlatProgramAPI",
+    "DecompInterface",
+    "BinDiff",
+    "hexdump",
+    "NativePointer",
+    "Memory.readByteArray",
+    "ARM64",
+    "instruction pointer"
+  ],
+  "curated_seeds": [
+    "https://github.com/frida/frida",
+    "https://github.com/NationalSecurityAgency/ghidra",
+    "https://github.com/nowsecure/frida-scripts",
+    "https://github.com/clearbluejar/ghidra-scripts"
+  ]
+}

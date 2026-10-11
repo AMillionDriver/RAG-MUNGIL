@@ -42,6 +42,18 @@ const mockCorpus: CorpusRecord[] = [
       vuln_type: 'Reentrancy',
     },
   },
+  {
+    id: 'test_4',
+    domain: '07_binary_analysis_forensics',
+    title: 'Frida Native Interceptor Hook & Memory Hexdump',
+    summary: 'Hooks native C/C++ exports using Interceptor.attach and dumps buffer memory.',
+    content: 'Interceptor.attach(targetFunc, { onEnter: function(args) { console.log(hexdump(args[0])); } });',
+    source_url: 'https://github.com/frida/frida',
+    created_at: '2026-10-10T00:00:00Z',
+    metadata: {
+      tool: 'Frida',
+    },
+  },
 ];
 
 describe('Hybrid Retrieval Engine', () => {
@@ -75,6 +87,20 @@ describe('Hybrid Retrieval Engine', () => {
     expect(results.length).toBe(1);
     expect(results[0].record.id).toBe('test_3');
     expect(results[0].score).toBeGreaterThan(0);
+  });
+
+  it('searches and filters Domain 07 binary analysis records correctly', () => {
+    const hybrid = new HybridRetrievalEngine();
+    hybrid.index(mockCorpus);
+
+    const results = hybrid.search('frida interceptor hook', {
+      domain: '07_binary_analysis_forensics',
+      mode: 'hybrid',
+    });
+
+    expect(results.length).toBe(1);
+    expect(results[0].record.id).toBe('test_4');
+    expect(results[0].record.domain).toBe('07_binary_analysis_forensics');
   });
 
   it('respects domain filter correctly', () => {

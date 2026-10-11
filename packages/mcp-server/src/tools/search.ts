@@ -1,23 +1,23 @@
 import { z } from 'zod';
 import { HybridRetrievalEngine } from '../engine/fusion.js';
 import { loadAllCorpusRecords } from '../loader/corpus-loader.js';
-import { validateQuery, clampLimit } from '../security/guard.js';
+import { validateQuery, clampLimit, validateSafeIdentifier } from '../security/guard.js';
 import { sanitizeAgentOutput } from '../security/sanitizer.js';
 
 export const searchToolSchema = {
   name: 'search_knowledge_base',
   description:
-    'Search curated technical corpora in RAG-MUNGIL across Web Scraping/Anti-bot Evasion and Web3/Smart Contract Security. Uses hybrid BM25 lexical keyword matching and vector semantic retrieval. Fully hardened against Indirect Prompt Injection.',
+    'Search curated technical corpora in RAG-MUNGIL across all 7 domains (Web Scraping, Smart Contracts, AI Agent Security, Vulnerability Research, DevSecOps, Compiler Errors, and Binary Analysis). Uses hybrid BM25 lexical keyword matching and vector semantic retrieval. Fully hardened against Indirect Prompt Injection.',
   parameters: z.object({
     query: z
       .string()
       .max(500, 'Query exceeds maximum allowed length of 500 characters.')
-      .describe('The search query (e.g., "curl-cffi JA4 bypass Cloudflare", "Foundry reentrancy PoC")'),
+      .describe('The search query (e.g., "curl-cffi JA4 bypass", "Foundry reentrancy", "Frida Interceptor.attach")'),
     domain: z
-      .enum(['all', '01_rag_scraping', '02_web3_smart_contract'])
+      .string()
       .optional()
       .default('all')
-      .describe('Target domain ID, or "all" to search across everything'),
+      .describe('Target domain ID (e.g. "01_rag_scraping", "07_binary_analysis_forensics"), or "all" to search across everything'),
     limit: z.number().int().min(1).max(20).optional().default(5).describe('Maximum number of records to return (1-20)'),
     mode: z.enum(['hybrid', 'keyword', 'semantic']).optional().default('hybrid').describe('Retrieval algorithm mode'),
   }),
@@ -38,10 +38,11 @@ export async function handleSearchTool(args: z.infer<typeof searchToolSchema.par
   // Security Layer 1: Bound query and clamp limit
   const sanitizedQuery = validateQuery(args.query, 500);
   const safeLimit = clampLimit(args.limit, 1, 20);
+  const safeDomain = args.domain && args.domain !== 'all' ? validateSafeIdentifier(args.domain, 'Domain') : 'all';
 
   const engine = await getEngine();
   const results = engine.search(sanitizedQuery, {
-    domain: args.domain,
+    domain: safeDomain,
     limit: safeLimit,
     mode: args.mode,
   });
@@ -51,7 +52,7 @@ export async function handleSearchTool(args: z.infer<typeof searchToolSchema.par
       content: [
         {
           type: 'text' as const,
-          text: `No records found in RAG-MUNGIL for query "${sanitizedQuery}" (domain: ${args.domain}).`,
+          text: `No records found in RAG-MUNGIL for query "${sanitizedQuery}" (domain: ${safeDomain}).`,
         },
       ],
     };

@@ -25,6 +25,7 @@ jobs:
           - 04_vulnerability_research
           - 05_cloud_devsecops
           - 06_compiler_errors
+          - 07_binary_analysis_forensics
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

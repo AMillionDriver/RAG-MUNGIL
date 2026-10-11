@@ -41,8 +41,13 @@ Tambahkan ke `.cursor/mcp.json` atau `claude_desktop_config.json`:
 
 | Domain ID | Topik & Cakupan | Total Records | Status Kurasi | File Path |
 | :--- | :--- | :---: | :---: | :--- |
-| `01_rag_scraping` | Web Scraping, TLS/JA4 Evasion, Anti-Bot Bypass | **31** | Gold Tier | `domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl` |
+| `01_rag_scraping` | Web Scraping, TLS/JA4 Evasion, Anti-Bot Bypass | **31+** | Gold Tier | `domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl` |
 | `02_web3_smart_contract` | Web3 & Smart Contract Security, Foundry PoCs, Audits | **4+** | Gold Tier | `domains/02_web3_smart_contract/data/02_web3_smart_contract_clean.jsonl` |
+| `03_ai_agent_security` | AI Agent Security, LLM Guardrails, Prompt Injection Defense | **Gold** | Gold Tier | `domains/03_ai_agent_security/data/03_ai_agent_security_clean.jsonl` |
+| `04_vulnerability_research` | Software Security, Vulnerability Root Cause (C/C++) | **Gold** | Gold Tier | `domains/04_vulnerability_research/data/04_vulnerability_research_clean.jsonl` |
+| `05_cloud_devsecops` | Cloud Security Hardening, Terraform, Kubernetes RBAC | **Gold** | Gold Tier | `domains/05_cloud_devsecops/data/05_cloud_devsecops_clean.jsonl` |
+| `06_compiler_errors` | Compiler Error Diagnostics, Linker Error Fixes | **Gold** | Gold Tier | `domains/06_compiler_errors/data/06_compiler_errors_clean.jsonl` |
+| `07_binary_analysis_forensics` | Binary Analysis, Frida Instrumentation, Ghidra Forensics | **Gold** | Gold Tier | `domains/07_binary_analysis_forensics/data/07_binary_analysis_forensics_clean.jsonl` |
 
 > *Catatan: Semua records melalui validasi deduplikasi SHA-256 dan fuzzy Jaccard similarity.*
 

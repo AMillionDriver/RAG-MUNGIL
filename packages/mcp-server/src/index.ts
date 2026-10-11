@@ -45,13 +45,12 @@ export function createMcpServer(): Server {
             properties: {
               query: {
                 type: 'string',
-                description: 'Search query (e.g. "curl-cffi JA4 bypass Cloudflare", "Foundry reentrancy PoC")',
+                description: 'Search query (e.g. "curl-cffi JA4 bypass", "Foundry reentrancy", "Frida Interceptor")',
               },
               domain: {
                 type: 'string',
-                enum: ['all', '01_rag_scraping', '02_web3_smart_contract'],
                 default: 'all',
-                description: 'Target domain ID, or "all" to search across everything',
+                description: 'Target domain ID (01-07), or "all" to search across all domains',
               },
               limit: {
                 type: 'integer',
@@ -86,7 +85,7 @@ export function createMcpServer(): Server {
             properties: {
               record_id: {
                 type: 'string',
-                description: 'The unique record identifier (e.g., "scraping_curl_cffi_curl_cffi")',
+                description: 'The unique record identifier (e.g., "scraping_curl_cffi_curl_cffi", "binary_frida_interceptor_native_hook")',
               },
             },
             required: ['record_id'],
@@ -100,12 +99,12 @@ export function createMcpServer(): Server {
             properties: {
               topic: {
                 type: 'string',
-                description: 'Target keyword or vulnerability pattern (e.g. "reentrancy", "turnstile")',
+                description: 'Target keyword or vulnerability pattern (e.g. "reentrancy", "turnstile", "frida")',
               },
               domain: {
                 type: 'string',
-                enum: ['all', '01_rag_scraping', '02_web3_smart_contract'],
                 default: 'all',
+                description: 'Target domain ID (01-07), or "all"',
               },
             },
             required: ['topic'],

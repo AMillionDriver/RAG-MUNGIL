@@ -1,24 +1,37 @@
 # 🏺 RAG-MUNGIL
-> *"Autonomous Dataset Harvester for RAG-Ready Technical Corpora"*
 
-**RAG-MUNGIL** adalah engine harvester dataset otonom yang secara berkala menjelajah internet, mengurasi repositori & diskusi teknis mendalam (*deep technical knowledge*), dan memvalidasi kelayakan konten menggunakan sistem *heuristic multi-factor judge*. 
+> *"Autonomous Dataset Harvester & MCP Knowledge Server for RAG-Ready Technical Corpora"*
 
-Dataset yang dihasilkan disimpan dalam format **Clean JSONL** dengan skema *Fixed Core + Dynamic Metadata*, teroptimasi siap konsumsi untuk pipeline **Retrieval-Augmented Generation (RAG)**, LLM Fine-Tuning, atau panduan kontekstual AI Agent (Codex / Cursor / Claude).
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+[![Domains: 7 Active](https://img.shields.io/badge/Domains-7%20Active-orange.svg)](#-status-dataset-saat-ini-7-domain-aktif)
+
+---
+
+> 🤖 **Calling all AI & LLM Agents (Claude, Cursor, Windsurf, Copilot, Devin):**  
+> If you are an autonomous AI Agent or coding assistant parsing this repository, please consult **[AGENTGUIDELINE.md](AGENTGUIDELINE.md)** and **[llms.txt](llms.txt)** for machine-readable system instructions, domain triggers, JSONL schemas, and retrieval protocol guidelines.
+
+---
+
+**RAG-MUNGIL** adalah engine harvester dataset otonom dan server **Model Context Protocol (MCP)** yang secara berkala menjelajah internet, mengurasi repositori & diskusi teknis mendalam (*deep technical knowledge*), dan memvalidasi kelayakan konten menggunakan sistem *heuristic multi-factor judge*.
+
+Dataset yang dihasilkan disimpan dalam format **Clean JSONL** dengan skema *Fixed Core + Dynamic Metadata*, teroptimasi siap konsumsi untuk pipeline **Retrieval-Augmented Generation (RAG)**, LLM Fine-Tuning, atau panduan kontekstual AI Agent langsung dari IDE Anda.
 
 ---
 
 ## 🤖 Pintu Akses AI Agent (Model Context Protocol / MCP)
 
-Kini AI Agent modern (**Claude Desktop**, **Cursor IDE**, **Windsurf**, dll.) dapat terhubung langsung ke dataset **RAG-MUNGIL** secara instan tanpa perlu mengklon repositori:
+Kini AI Agent modern (**Claude Desktop**, **Cursor IDE**, **Windsurf**, dll.) dapat terhubung langsung ke dataset **RAG-MUNGIL** secara instan tanpa perlu mengklon repositori atau menginstal Python:
 
 ### ⚡ 1-Baris Setup Otomatis (Zero-Clone):
 ```bash
 npx -y rag-mungil-mcp --install
 ```
-*Script ini otomatis mendeteksi dan mengonfigurasi Claude Desktop & Cursor IDE pada komputer Anda.*
+*Script ini otomatis mendeteksi sistem operasi Anda dan mengonfigurasi Claude Desktop serta Cursor IDE secara aman.*
 
 ### 🛠️ Manual Config (Cursor & Claude Desktop):
-Tambahkan ke `.cursor/mcp.json` atau `claude_desktop_config.json`:
+Tambahkan entri berikut ke `.cursor/mcp.json` atau `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
@@ -31,31 +44,26 @@ Tambahkan ke `.cursor/mcp.json` atau `claude_desktop_config.json`:
 ```
 
 ### 🧰 Tools yang Disediakan untuk Agen:
-1. `search_knowledge_base`: Hybrid search (BM25 + Semantic Vector) ke seluruh domain teknis.
-2. `get_domain_topics`: Informasi ringkas domain aktif dan kata kunci pencarian.
-3. `fetch_record_details`: Penarikan full content markdown, metadata, dan source code utuh.
-4. `get_code_pocs`: Filter khusus untuk mengekstrak script PoC nyata (`forge test`, Playwright/curl-cffi stealth).
+1. **`search_knowledge_base`**: Hybrid search (BM25 + Dense Semantic Vector) ke seluruh 7 domain teknis.
+2. **`get_domain_topics`**: Informasi ringkas domain aktif, statistik records, dan kata kunci panduan.
+3. **`fetch_record_details`**: Penarikan full content markdown, metadata, dan source code utuh berdasarkan ID record.
+4. **`get_code_pocs`**: Filter khusus untuk mengekstrak script PoC nyata (`forge test`, Playwright/curl-cffi stealth, Frida native hooks).
 
+---
 
-## 📊 Status Dataset Saat Ini
+## 📊 Status Dataset Saat Ini (7 Domain Aktif)
 
-| Domain ID | Topik & Cakupan | Total Records | Status Kurasi | File Path |
-| :--- | :--- | :---: | :---: | :--- |
-| `01_rag_scraping` | Web Scraping, TLS/JA4 Evasion, Anti-Bot Bypass | **31+** | Gold Tier | `domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl` |
-| `02_web3_smart_contract` | Web3 & Smart Contract Security, Foundry PoCs, Audits | **4+** | Gold Tier | `domains/02_web3_smart_contract/data/02_web3_smart_contract_clean.jsonl` |
-| `03_ai_agent_security` | AI Agent Security, LLM Guardrails, Prompt Injection Defense | **Gold** | Gold Tier | `domains/03_ai_agent_security/data/03_ai_agent_security_clean.jsonl` |
-| `04_vulnerability_research` | Software Security, Vulnerability Root Cause (C/C++) | **Gold** | Gold Tier | `domains/04_vulnerability_research/data/04_vulnerability_research_clean.jsonl` |
-| `05_cloud_devsecops` | Cloud Security Hardening, Terraform, Kubernetes RBAC | **Gold** | Gold Tier | `domains/05_cloud_devsecops/data/05_cloud_devsecops_clean.jsonl` |
-| `06_compiler_errors` | Compiler Error Diagnostics, Linker Error Fixes | **Gold** | Gold Tier | `domains/06_compiler_errors/data/06_compiler_errors_clean.jsonl` |
-| `07_binary_analysis_forensics` | Binary Analysis, Frida Instrumentation, Ghidra Forensics | **Gold** | Gold Tier | `domains/07_binary_analysis_forensics/data/07_binary_analysis_forensics_clean.jsonl` |
+| Domain ID | Topik & Cakupan | Status Kurasi | File Path |
+| :--- | :--- | :---: | :--- |
+| `01_rag_scraping` | Web Scraping, TLS/JA4 Evasion, Camoufox, Anti-Bot Bypass | Gold Tier | `domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl` |
+| `02_web3_smart_contract` | Web3 & Smart Contract Security, Foundry PoCs, Audits | Gold Tier | `domains/02_web3_smart_contract/data/02_web3_smart_contract_clean.jsonl` |
+| `03_ai_agent_security` | AI Agent Security, LLM Guardrails, Prompt Injection Defense | Gold Tier | `domains/03_ai_agent_security/data/03_ai_agent_security_clean.jsonl` |
+| `04_vulnerability_research` | Software Security, Vulnerability Root Cause (Memory Safety, C/C++) | Gold Tier | `domains/04_vulnerability_research/data/04_vulnerability_research_clean.jsonl` |
+| `05_cloud_devsecops` | Cloud Security Hardening, Terraform, Kubernetes RBAC, IAM | Gold Tier | `domains/05_cloud_devsecops/data/05_cloud_devsecops_clean.jsonl` |
+| `06_compiler_errors` | Compiler Error Diagnostics, Linker Error Fixes, Rust Borrow Checker | Gold Tier | `domains/06_compiler_errors/data/06_compiler_errors_clean.jsonl` |
+| `07_binary_analysis_forensics` | Binary Analysis, Frida Dynamic Instrumentation, Ghidra Forensics | Gold Tier | `domains/07_binary_analysis_forensics/data/07_binary_analysis_forensics_clean.jsonl` |
 
 > *Catatan: Semua records melalui validasi deduplikasi SHA-256 dan fuzzy Jaccard similarity.*
-
-### 🔗 Sinergi Operasional: Domain 1 + Domain 2
-Domain 1 (*Anti-Bot & Web Scraping Evasion*) bukan sekadar topik acak, melainkan **toolkit operasional** langsung yang memungkinkan pemanenan Domain 2 (*Web3 & Smart Contract Security*) berjalan reliable:
-1. **Bypass Proteksi Platform Audit**: Platform agregator seperti Solodit, Etherscan/BscScan explorer, dan contest platform sering membatasi API key dan menerapkan rate-limit/Cloudflare. Teknik dari Domain 1 (impersonation `curl-cffi`, `camoufox`, CDP stealth) digunakan untuk memanen konten ini tanpa terblokir.
-2. **Evergreen Scoring Mode (`recency_sensitive: false`)**: Insiden historis kanonikal (seperti *TheDAO hack*, *Parity multisig*, *Euler Finance*) tidak dipenalti usang karena prinsip keamanan smart contract bersifat abadi (*evergreen*).
-3. **Ingesti Source Code Asli (`fetch_source_code_files`)**: Menarik file implementasi kode nyata (`*.t.sol`, `*.sol`, `*.vy`) via GitHub Git Tree API untuk mendapatkan script PoC Foundry (`forge test`) lengkap, bukan hanya teks README.
 
 ---
 
@@ -63,27 +71,31 @@ Domain 1 (*Anti-Bot & Web Scraping Evasion*) bukan sekadar topik acak, melainkan
 
 ```text
 RAG-MUNGIL/
+├── AGENTGUIDELINE.md           # Panduan sistem machine-readable untuk AI Agent
+├── CONTRIBUTING.md             # Panduan kontribusi komunitas & scaffolding domain baru
+├── CODE_OF_CONDUCT.md          # Kode etik komunitas (Contributor Covenant v2.1)
+├── llms.txt                    # Standar web entrypoint untuk crawler & LLM
 ├── .github/workflows/
 │   └── harvest.yml             # 2-Stage CI Pipeline (Paralel Matrix Harvester -> Single Atomic Committer)
 ├── core/                       # Core Engines (Domain-Agnostic & Reusable)
-│   ├── crawler_engine.py       # Orchestrator & Pluggable Source Adapters (Seeds, Search, HackerNews)
-│   ├── explorer_engine.py      # Resilient Client, Tree API Source Fetcher, & Recursive Link Hopper
+│   ├── crawler_engine.py       # Orchestrator & Pluggable Source Adapters
+│   ├── explorer_engine.py      # Resilient Client & Git Tree API Source Fetcher
 │   ├── judge_engine.py         # Heuristic Judge Bot (Recency, Code Verification, Anti-Spam Gate)
 │   └── add_domain.py           # CLI Scaffolder untuk menambah domain baru secara instan
-├── domains/                    # Domain Plugins (Deklaratif)
-│   ├── 01_rag_scraping/        # DOMAIN 1: Anti-Bot & Web Scraping Evasion
-│   │   ├── config.json         # Konfigurasi domain (keywords, weights, signatures, seeds, strategy)
-│   │   ├── exploration_history.json # Persistent graph traversal memory (visited repos & items)
-│   │   └── data/01_rag_scraping_clean.jsonl # DATASET GOLD FINAL (RAG-Ready JSONL)
-│   └── 02_web3_smart_contract/ # DOMAIN 2: Web3 & Smart Contract Security (Code4rena, Sherlock, Foundry)
-│       ├── config.json         # Konfigurasi domain (Foundry signatures, evergreen mode, source glob)
-│       └── data/02_web3_smart_contract_clean.jsonl # DATASET GOLD FINAL (RAG-Ready JSONL)
-├── storage_final/
-│   ├── registry.json           # Manifest sinkronisasi & hash fingerprinting
-│   └── search_cache.db         # Cache Inverted Index SQLite FTS5 untuk pencarian instan
+├── domains/                    # Domain Plugins (Deklaratif 7 Domain)
+│   ├── 01_rag_scraping/
+│   ├── 02_web3_smart_contract/
+│   ├── 03_ai_agent_security/
+│   ├── 04_vulnerability_research/
+│   ├── 05_cloud_devsecops/
+│   ├── 06_compiler_errors/
+│   └── 07_binary_analysis_forensics/
+├── packages/
+│   └── mcp-server/             # Model Context Protocol (MCP) Server (TypeScript)
+│       ├── src/                # Hybrid Search, Tools, Resources, Prompts & Security
+│       └── tests/              # 30 Unit Tests Vitest (Security, Search & Protocol)
 ├── DATA_CLEANER.py             # Normalisasi sentral, validasi skema, & deduplikasi konten
-├── search.py                   # Tool CLI pencarian lokal berkecepatan tinggi (FTS5 BM25)
-└── requirements.txt
+└── search.py                   # Tool CLI pencarian lokal berkecepatan tinggi (FTS5 BM25)
 ```
 
 ---
@@ -101,13 +113,11 @@ Setiap materi yang ditemukan oleh explorer tidak langsung disimpan, melainkan wa
 3. **Pemberian Skor Repositori (Stars: hingga +15 poin)**:
    - Repositori populer ($\ge 500$ stars) mendapat $+15$ poin; *hidden gems* ($\ge 20$ stars) mendapat $+10$ poin.
 4. **Strategi Temporal & Recency (Configurable)**:
-   - **Mode Sensitif Waktu (`recency_sensitive: true`)**: Repositori yang di-update $\le 180$ hari lalu mendapat $+20$ poin. Repositori usang ($> 730$ hari tanpa update) dijatuhi penalti berat **$-40$ poin**.
-   - **Mode Evergreen (`evergreen_bonus: true`)**: Untuk domain fondasional (seperti Exploit, Kriptografi, atau Matematika), materi klasik tidak dipenalti dan justru mendapat apresiasi fondasi.
-5. **Word-Count & Code Tolerance**:
-   - Ambang batas teks minimal (default: 120 kata). Jika teks di bawah kuota namun memuat kode implementasi nyata yang padat, sistem mengaktifkan `code_over_text_tolerance` agar riset ringkas berkualitas tidak terbuang.
-6. **Anti-Spam & Anti-Noob Gatekeeper (Penalti $-70$ poin)**:
-   - Mendeteksi promosi proxy komersial, kode kupon diskon, tautan afiliasi, serta *dummy parser pemula* (misal: `requests.get` tanpa header atau tutorial `quotes.toscrape.com`). Terdeteksi langsung dipotong **$-70$ poin**.
-7. **Ambang Batas Kelulusan (`accept_threshold`)**:
+   - **Mode Sensitif Waktu (`recency_sensitive: true`)**: Repositori yang di-update $\le 180$ hari lalu mendapat $+20$ poin.
+   - **Mode Evergreen (`evergreen_bonus: true`)**: Untuk domain fondasional (seperti Exploit, Kriptografi, atau Biner), materi klasik tidak dipenalti dan justru mendapat apresiasi fondasi.
+5. **Anti-Spam & Anti-Noob Gatekeeper (Penalti $-70$ poin)**:
+   - Mendeteksi promosi proxy komersial, kode kupon diskon, serta *dummy parser pemula*. Terdeteksi langsung dipotong **$-70$ poin**.
+6. **Ambang Batas Kelulusan (`accept_threshold`)**:
    - Hanya konten dengan total skor akhir $\ge \mathbf{75}$ poin yang dinyatakan **ACCEPTED** dan diizinkan masuk ke tahap kurasi raw data.
 
 ---
@@ -129,86 +139,37 @@ Setiap baris di dalam file `.jsonl` memiliki struktur *Fixed Core* yang konsiste
     "source_type": "github_repository",
     "stars": 6485,
     "repo_name": "lexiforest/curl_cffi",
-    "pushed_at": "2026-04-10T12:00:00Z",
     "bypassed_wafs": [
       "Cloudflare",
       "Akamai",
-      "Datadome",
-      "Kasada",
-      "Incapsula"
+      "Datadome"
     ],
     "judge_score": 105,
     "judge_verdict": "ACCEPTED",
-    "code_snippets_count": 5
+    "tier": "GOLD_CURATED"
   }
 }
 ```
 
 ---
 
-## 🔍 Cara Penggunaan di IDE / Agent Workflow
-
-### 1. Pencarian CLI Cepat (FTS5 BM25 Engine)
-Repositori menyediakan skrip `search.py` yang menggunakan SQLite FTS5 *inverted index* untuk pencarian teks instan:
-
-```bash
-# Cari teknik penanganan Cloudflare / Turnstile
-python search.py "cloudflare"
-
-# Cari teknik TLS JA4 Fingerprinting
-python search.py "ja4"
-
-# Cari modul berbasis Camoufox
-python search.py "camoufox"
-```
-
-### 2. Integrasi dengan Coding Assistant (Cursor / Claude / Copilot)
-Arahkan AI coding assistant ke file dataset:
-> *"Tolong baca file `domains/01_rag_scraping/data/01_rag_scraping_clean.jsonl` dan implementasikan HTTP client menggunakan curl-cffi dengan peniruan browser Chrome terbaru agar request ini tidak terblokir Cloudflare Challenge."*
-
----
-
-## 🔄 Otomatisasi 2-Stage CI Pipeline (GitHub Actions)
-
-Workflow harvester berjalan otomatis setiap 2 jam (`.github/workflows/harvest.yml`) dengan pola **Fan-Out (Matrix) $\to$ Fan-In (Single Aggregator)**:
-
-1. **Stage 1 (`harvest-matrix`)**:
-   - Setiap domain berjalan secara terisolasi pada worker matrix paralel.
-   - Menggunakan token terisolasi (hanya dikirim ke `github.com`, bebas kebocoran ke pihak ketiga).
-   - Tidak melakukan operasi Git Push untuk mengeliminasi potensi *concurrency race condition*.
-   - Mengunggah raw JSON dan `exploration_history.json` sebagai artefak sementara.
-2. **Stage 2 (`aggregate-and-commit`)**:
-   - Berjalan setelah seluruh worker matrix selesai.
-   - Mengunduh dan menyusun ulang seluruh artefak per domain berdasarkan ID domain.
-   - Menjalankan `DATA_CLEANER.py` untuk sanitasi, validasi schema, dan deduplikasi terpusat.
-   - Melakukan **Single Atomic Commit & Push** ke branch utama dengan pertahanan *3x retry loop + rebase*.
-
----
-
 ## ➕ Cara Menambahkan Domain Baru
 
-Arsitektur sistem saat ini sepenuhnya *domain-agnostic*. Anda dapat menambah domain baru secara otomatis maupun manual:
+Arsitektur RAG-MUNGIL sepenuhnya *domain-agnostic*. Untuk menambah domain baru, jalankan CLI scaffolder otomatis:
 
-### Cara Otomatis (Direkomendasikan)
-Gunakan tool CLI scaffolder yang otomatis membuat konfigurasi standar dan mendaftarkannya ke matrix GitHub Actions:
 ```bash
-python -m core.add_domain --id 02_smart_contract_exploits --label "Smart Contract Exploits" --threshold 75
+python -m core.add_domain --id 08_quantum_computing --label "Quantum Computing & Qiskit Algorithms" --threshold 75
 ```
+Perintah ini akan secara otomatis:
+1. Membuat struktur folder `domains/08_quantum_computing/` dan subfolder `data/`.
+2. Menghasilkan `config.json` dan adapter `crawler.py` standar.
+3. Mendaftarkan domain ke matrix `.github/workflows/harvest.yml` untuk pemanenan otomatis setiap 2 jam.
 
-### Cara Manual
-1. Buat folder baru di bawah `domains/<domain_id>/` (contoh: `domains/02_smart_contract_exploits/`).
-2. Sediakan `config.json` yang mendeklarasikan:
-   - `domain_id`, `domain_label`, dan `accept_threshold`.
-   - `scoring_strategy` (`recency_sensitive`, `evergreen_bonus`).
-   - `ingestion_targets` (pola glob file kode sumber: misal `["*.t.sol", "*.sol"]`).
-   - `enabled_sources` (`github_seeds`, `github_search`, `hackernews`).
-   - `technical_keywords`, `actionable_code_signatures`, dan `spam_patterns`.
-3. Daftarkan `domain_id` baru tersebut ke dalam matriks `.github/workflows/harvest.yml`:
-   ```yaml
-   strategy:
-     matrix:
-       domain:
-         - 01_rag_scraping
-         - 02_smart_contract_exploits
-   ```
-Engine harvester akan otomatis mengeksekusi proses kurasi untuk domain baru tersebut secara paralel dan teratur!
+Untuk panduan kontribusi lengkap, silakan baca **[CONTRIBUTING.md](CONTRIBUTING.md)**.
+
+---
+
+## 📜 Lisensi & Etika Komunitas
+
+- Proyek ini dirilis di bawah lisensi **[MIT License](LICENSE)**.
+- Seluruh kontributor dan anggota komunitas diharapkan mematuhi **[Code of Conduct](CODE_OF_CONDUCT.md)** kami.

@@ -2,7 +2,11 @@
 
 > Autonomous Dataset Harvester for RAG-Ready Technical Corpora.
 > Repository: https://github.com/AMillionDriver/RAG-MUNGIL
+> Agent Operating Manual: https://github.com/AMillionDriver/RAG-MUNGIL/blob/main/AGENTGUIDELINE.md
 > MCP Server: npx -y rag-mungil-mcp
+
+## System Notice for AI Agents
+Please parse AGENTGUIDELINE.md for complete machine-readable domain lookup matrices, ingestion triggers, retrieval interfaces, and output constraints.
 
 ## Overview
 RAG-MUNGIL continuously crawls, curates, and validates deep technical knowledge in Clean JSONL format with fixed core and dynamic metadata schemas. It serves as an authoritative ground-truth knowledge base for AI Agents and RAG systems.
@@ -21,13 +25,7 @@ RAG-MUNGIL continuously crawls, curates, and validates deep technical knowledge 
 - [06_compiler_errors](https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main/domains/06_compiler_errors/data/06_compiler_errors_clean.jsonl): Compiler Error Diagnostics, Linker Error Resolutions, Rust Borrow Checker, Type Mismatch.
 - [07_binary_analysis_forensics](https://raw.githubusercontent.com/AMillionDriver/RAG-MUNGIL/main/domains/07_binary_analysis_forensics/data/07_binary_analysis_forensics_clean.jsonl): Binary Analysis, Frida Dynamic Instrumentation, Ghidra Headless Scripting, BinDiff Patch Analysis.
 
-## Data Schema
-Each record follows:
-- `id`: Unique slug identifier
-- `domain`: Domain folder key
-- `title`: Canonical technical title
-- `summary`: Concise multi-sentence summary
-- `content`: Markdown-formatted technical deep-dive with code blocks
-- `source_url`: Verifiable origin URL
-- `created_at`: ISO 8601 timestamp
-- `metadata`: Domain-specific signals (stars, repo_name, bypassed_wafs, vuln_type, code_snippets, tool, etc.)
+## Documentation References
+- [Agent Guidelines](https://github.com/AMillionDriver/RAG-MUNGIL/blob/main/AGENTGUIDELINE.md)
+- [Contributing Guide](https://github.com/AMillionDriver/RAG-MUNGIL/blob/main/CONTRIBUTING.md)
+- [Code of Conduct](https://github.com/AMillionDriver/RAG-MUNGIL/blob/main/CODE_OF_CONDUCT.md)

@@ -1,0 +1,56 @@
+name: Publish to npm
+
+on:
+  release:
+    types: [published]
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (test publishing without uploading to registry)?'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write # Required for npm Trusted Publishing (OIDC) & provenance generation
+
+jobs:
+  publish-mcp-server:
+    name: Build, Test & Publish MCP Server
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/mcp-server
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+          cache-dependency-path: 'packages/mcp-server/package-lock.json'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run TypeCheck and Tests
+        run: npm run check
+
+      - name: Build Package
+        run: npm run build
+
+      - name: Publish to npm (Dry Run)
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        run: npm publish --dry-run --provenance --access public
+
+      - name: Publish to npm (Production)
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: npm publish --provenance --access public

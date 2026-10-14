@@ -1,16 +1,35 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Search, Copy, Check, ExternalLink, Star, Code2 } from 'lucide-react';
 import { type RagRecord } from '../lib/ragData';
+import { debounce, checkRateLimit } from '../lib/rateLimiter';
 
 interface DatasetViewerProps {
   dataset: RagRecord[];
 }
 
 export default function DatasetViewer({ dataset }: DatasetViewerProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [inputValue, setInputValue] = useState('');       // nilai input langsung (controlled)
+  const [searchQuery, setSearchQuery] = useState('');     // nilai yang dipakai untuk filter (debounced)
   const [selectedWaf, setSelectedWaf] = useState<string>('ALL');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [rawViewId, setRawViewId] = useState<string | null>(null);
+
+  // Debounced setter untuk filter — dikirim setelah 250ms diam
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSetQuery = useCallback(
+    debounce((val: string) => {
+      const result = checkRateLimit('search_query');
+      if (result.allowed) {
+        setSearchQuery(val);
+      }
+      // Jika tidak allowed, RateLimitBanner sudah dipanggil secara internal oleh checkRateLimit
+    }, 250),
+    []
+  );
+
+  // Ref agar stale closure tidak terjadi saat debounce
+  const debouncedRef = useRef(debouncedSetQuery);
+  debouncedRef.current = debouncedSetQuery;
 
   const wafList = Array.from(
     new Set(dataset.flatMap((d) => d.metadata.bypassed_wafs || []))

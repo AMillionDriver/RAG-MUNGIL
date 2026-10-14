@@ -13,13 +13,23 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && chmod +x dist/cli.js",
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "test": "vitest run",
     "lint": "tsc --noEmit",
     "check": "npm run lint && npm run test"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AMillionDriver/RAG-MUNGIL.git",
+    "directory": "packages/mcp-server"
+  },
+  "bugs": {
+    "url": "https://github.com/AMillionDriver/RAG-MUNGIL/issues"
+  },
+  "homepage": "https://github.com/AMillionDriver/RAG-MUNGIL#readme",
   "keywords": [
     "mcp",
     "model-context-protocol",

@@ -5,6 +5,7 @@ import DatasetViewer from './components/DatasetViewer';
 import CodexBridgeGuide from './components/CodexBridgeGuide';
 import GitHubWorkflowStatus from './components/GitHubWorkflowStatus';
 import TurnstileGateway from './components/TurnstileGateway';
+import RateLimitBanner from './components/RateLimitBanner';
 
 const TURNSTILE_KEYS = {
   invisible: (import.meta.env.VITE_TURNSTILE_INVISIBLE_SITE_KEY as string) || '0x4AAAAAADu5H6mpeAoSKieA',
@@ -208,6 +209,9 @@ export default function App() {
       <footer className="border-t border-ink-600 px-5 py-3 text-[11px] text-paper-dim/70 font-mono">
         🏺 RAG-MUNGIL — disurvei otomatis tiap 2 jam lewat GitHub Actions
       </footer>
+
+      {/* Rate Limit Banner — global floating toast, bawah kanan */}
+      <RateLimitBanner />
     </div>
   );
 }

@@ -11,6 +11,8 @@
  * ini langsung menampilkannya — tidak perlu rebuild/redeploy Vercel.
  */
 
+import { checkRateLimit } from './rateLimiter';
+
 export interface RagRecord {
   id: string;
   domain: string;
@@ -96,7 +98,26 @@ async function fetchDomainRecords(domainId: string): Promise<RagRecord[]> {
   return parseJsonl(text);
 }
 
-export async function loadRagDataset(): Promise<RagDataset> {
+// In-Memory SWR Cache Layer
+let cachedDataset: RagDataset | null = null;
+let lastFetchTimestamp = 0;
+const CACHE_TTL_MS = 60 * 1000; // 60 detik cache TTL
+
+export async function loadRagDataset(forceRefresh: boolean = false): Promise<RagDataset> {
+  const now = Date.now();
+
+  // 1. Jika data ada di cache dan belum expired, langsung kembalikan cache (0 cost / 0 network)
+  if (!forceRefresh && cachedDataset && now - lastFetchTimestamp < CACHE_TTL_MS) {
+    return cachedDataset;
+  }
+
+  // 2. Periksa rate limit sebelum melakukan fetch jaringan
+  const rateLimit = checkRateLimit('dataset_refresh', true);
+  if (!rateLimit.allowed && cachedDataset) {
+    console.warn(`[RateLimit] ${rateLimit.reason} - Menyajikan dataset dari cache lokal.`);
+    return cachedDataset;
+  }
+
   const registry = await fetchRegistry();
   const domainIds = Object.keys(registry);
 
@@ -111,11 +132,15 @@ export async function loadRagDataset(): Promise<RagDataset> {
     lastUpdated: registry[id]?.last_updated ?? null,
   }));
 
-  return {
+  const result: RagDataset = {
     records: perDomainRecords.flat(),
     domains,
     fetchedAt: new Date().toISOString(),
   };
+
+  cachedDataset = result;
+  lastFetchTimestamp = Date.now();
+  return result;
 }
 
 /** Format "47 menit lalu" dari string ISO — dipakai di log status situs. */

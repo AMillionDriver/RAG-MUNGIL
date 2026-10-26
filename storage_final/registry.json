@@ -1,7 +1,7 @@
 {
   "01_rag_scraping": {
-    "last_updated": "2026-10-26T09:32:14.122373Z",
-    "total_records": 168
+    "last_updated": "2026-10-26T16:27:29.980607Z",
+    "total_records": 170
   },
   "hashes": [
     "c2bedf6e20ddb9da9ec58197ae816ed154b14a2423e6d8aa93d6807c56083f09",
@@ -567,40 +567,43 @@
     "1c94e675fe46d6f9905fc655178e09ec0cae807703c3b9107d5022a25ada9f48",
     "3b4b43d3092b7c423af4c0c2bc1f15eabd08275c235929541e1982199cbb52a8",
     "f48a24f1fdb506d738d860196e843b4eb76d933c39f8ae8171ca7f21d46a09a4",
-    "df497db82051f2c9e865ef70cc1da475c5608a9501b0e0a9c1007dad123fd405"
+    "df497db82051f2c9e865ef70cc1da475c5608a9501b0e0a9c1007dad123fd405",
+    "6622a7445cb5cbdda565506e4cae3a8474e8e043fd71acae7259ae2ccba2afe0",
+    "137fa588c8f16763a8d0093f8876a83ae94971a73cc3474c9623f0a6359fed31",
+    "7af176252deae327f35cca6b2bbeb97eaed0d8efddcf4d5f5ca2ca4897f63f5e"
   ],
-  "total_records": 599,
-  "last_sync": "2026-10-26T09:32:14.336627Z",
+  "total_records": 602,
+  "last_sync": "2026-10-26T16:27:30.107144Z",
   "03_ai_agent_security": {
-    "last_updated": "2026-10-26T09:32:14.241208Z",
-    "total_records": 58
+    "last_updated": "2026-10-26T16:27:30.055113Z",
+    "total_records": 59
   },
   "04_vulnerability_research": {
-    "last_updated": "2026-10-26T09:32:14.248110Z",
+    "last_updated": "2026-10-26T16:27:30.059146Z",
     "total_records": 9
   },
   "05_cloud_devsecops": {
-    "last_updated": "2026-10-26T09:32:14.325659Z",
+    "last_updated": "2026-10-26T16:27:30.101165Z",
     "total_records": 119
   },
   "02_web3_smart_contract": {
-    "last_updated": "2026-10-26T09:32:14.200640Z",
+    "last_updated": "2026-10-26T16:27:30.025081Z",
     "total_records": 111
   },
   "06_compiler_errors": {
-    "last_updated": "2026-10-26T09:32:14.335186Z",
+    "last_updated": "2026-10-26T16:27:30.106330Z",
     "total_records": 122
   },
   "07_binary_analysis_forensics": {
-    "last_updated": "2026-10-26T09:32:14.335725Z",
+    "last_updated": "2026-10-26T16:27:30.106644Z",
     "total_records": 4
   },
   "08_captcha_automation_solver": {
-    "last_updated": "2026-10-26T09:32:14.336149Z",
+    "last_updated": "2026-10-26T16:27:30.106874Z",
     "total_records": 4
   },
   "09_captcha_architectures_evolution": {
-    "last_updated": "2026-10-26T09:32:14.336602Z",
+    "last_updated": "2026-10-26T16:27:30.107127Z",
     "total_records": 4
   }
 }

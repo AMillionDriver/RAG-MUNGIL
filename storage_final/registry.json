@@ -1,6 +1,6 @@
 {
   "01_rag_scraping": {
-    "last_updated": "2026-10-28T00:51:56.972689Z",
+    "last_updated": "2026-10-28T07:46:45.066628Z",
     "total_records": 173
   },
   "hashes": [
@@ -577,37 +577,37 @@
     "63014579d487f9b5dd998ca0462aab1764335d2fafd7ce6522a48c96f17159e7"
   ],
   "total_records": 606,
-  "last_sync": "2026-10-28T00:51:57.174390Z",
+  "last_sync": "2026-10-28T07:46:45.196311Z",
   "03_ai_agent_security": {
-    "last_updated": "2026-10-28T00:51:57.086455Z",
+    "last_updated": "2026-10-28T07:46:45.139100Z",
     "total_records": 59
   },
   "04_vulnerability_research": {
-    "last_updated": "2026-10-28T00:51:57.093351Z",
+    "last_updated": "2026-10-28T07:46:45.143523Z",
     "total_records": 9
   },
   "05_cloud_devsecops": {
-    "last_updated": "2026-10-28T00:51:57.164808Z",
+    "last_updated": "2026-10-28T07:46:45.189350Z",
     "total_records": 120
   },
   "02_web3_smart_contract": {
-    "last_updated": "2026-10-28T00:51:57.046845Z",
+    "last_updated": "2026-10-28T07:46:45.113459Z",
     "total_records": 111
   },
   "06_compiler_errors": {
-    "last_updated": "2026-10-28T00:51:57.173075Z",
+    "last_updated": "2026-10-28T07:46:45.195415Z",
     "total_records": 122
   },
   "07_binary_analysis_forensics": {
-    "last_updated": "2026-10-28T00:51:57.173614Z",
+    "last_updated": "2026-10-28T07:46:45.195796Z",
     "total_records": 4
   },
   "08_captcha_automation_solver": {
-    "last_updated": "2026-10-28T00:51:57.173955Z",
+    "last_updated": "2026-10-28T07:46:45.196028Z",
     "total_records": 4
   },
   "09_captcha_architectures_evolution": {
-    "last_updated": "2026-10-28T00:51:57.174364Z",
+    "last_updated": "2026-10-28T07:46:45.196294Z",
     "total_records": 4
   }
 }

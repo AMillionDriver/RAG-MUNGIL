@@ -1,6 +1,6 @@
 {
   "01_rag_scraping": {
-    "last_updated": "2026-11-13T19:00:49.615117Z",
+    "last_updated": "2026-11-14T00:35:28.340472Z",
     "total_records": 196
   },
   "hashes": [
@@ -612,40 +612,41 @@
     "8847d9cb84b269f5cc8c40cdb677a7800fe446b10b70505ca672da12e50b0a25",
     "2636d11d06ad276a1014c8f8fcabbffc9180a626fbec559b84bfbf5043aa38f2",
     "e56730f4e7430e3580e7fe59a536c3a55cee8151c2841d7e5198756e6d86480e",
-    "164c551afc351ac1bd529ccc4806abc4ee3b748e3f66cb6937c2c94d26fb5d40"
+    "164c551afc351ac1bd529ccc4806abc4ee3b748e3f66cb6937c2c94d26fb5d40",
+    "8d93d76700a0c0ed40f1b582182873e3b13ffc3601731d5b53ba9b5bab457905"
   ],
-  "total_records": 644,
-  "last_sync": "2026-11-13T19:00:49.786399Z",
+  "total_records": 645,
+  "last_sync": "2026-11-14T00:35:28.573510Z",
   "03_ai_agent_security": {
-    "last_updated": "2026-11-13T19:00:49.709281Z",
+    "last_updated": "2026-11-14T00:35:28.433721Z",
     "total_records": 62
   },
   "04_vulnerability_research": {
-    "last_updated": "2026-11-13T19:00:49.714668Z",
+    "last_updated": "2026-11-14T00:35:28.439519Z",
     "total_records": 9
   },
   "05_cloud_devsecops": {
-    "last_updated": "2026-11-13T19:00:49.778159Z",
-    "total_records": 132
+    "last_updated": "2026-11-14T00:35:28.564583Z",
+    "total_records": 133
   },
   "02_web3_smart_contract": {
-    "last_updated": "2026-11-13T19:00:49.675134Z",
+    "last_updated": "2026-11-14T00:35:28.399908Z",
     "total_records": 111
   },
   "06_compiler_errors": {
-    "last_updated": "2026-11-13T19:00:49.785326Z",
+    "last_updated": "2026-11-14T00:35:28.572444Z",
     "total_records": 122
   },
   "07_binary_analysis_forensics": {
-    "last_updated": "2026-11-13T19:00:49.785758Z",
+    "last_updated": "2026-11-14T00:35:28.572854Z",
     "total_records": 4
   },
   "08_captcha_automation_solver": {
-    "last_updated": "2026-11-13T19:00:49.786052Z",
+    "last_updated": "2026-11-14T00:35:28.573142Z",
     "total_records": 4
   },
   "09_captcha_architectures_evolution": {
-    "last_updated": "2026-11-13T19:00:49.786380Z",
+    "last_updated": "2026-11-14T00:35:28.573489Z",
     "total_records": 4
   }
 }

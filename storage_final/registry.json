@@ -1,6 +1,6 @@
 {
   "01_rag_scraping": {
-    "last_updated": "2026-11-22T09:07:59.551382Z",
+    "last_updated": "2026-11-22T17:32:21.882905Z",
     "total_records": 214
   },
   "hashes": [
@@ -644,40 +644,42 @@
     "f0232261e04eb7498c8d9799cf8331802d846339d48426e80ae52f7faac78470",
     "34c404b1a11d4cd1d620d76dd48a450fcbf25c24111a4b61503adf380bb175f6",
     "e785e42a9cbab00e9675320c704b805be4003c1b2ea762de8762b90280155657",
-    "dec9feb67ea94ab4cae790579134d9a956bb3d8e7c4bcb0fc3fb36556fff1b80"
+    "dec9feb67ea94ab4cae790579134d9a956bb3d8e7c4bcb0fc3fb36556fff1b80",
+    "7acf20b03d91e6651f60658863d7ff4a50def800d8e0386f558bab8c425ba258",
+    "f48be92542e1f89f3f33e457d7a55b7e6ea5c91f5202d20d58c039acc40e0350"
   ],
-  "total_records": 676,
-  "last_sync": "2026-11-22T09:07:59.727342Z",
+  "total_records": 678,
+  "last_sync": "2026-11-22T17:32:22.115051Z",
   "03_ai_agent_security": {
-    "last_updated": "2026-11-22T09:07:59.645030Z",
-    "total_records": 66
+    "last_updated": "2026-11-22T17:32:22.015305Z",
+    "total_records": 68
   },
   "04_vulnerability_research": {
-    "last_updated": "2026-11-22T09:07:59.650749Z",
+    "last_updated": "2026-11-22T17:32:22.022677Z",
     "total_records": 9
   },
   "05_cloud_devsecops": {
-    "last_updated": "2026-11-22T09:07:59.718379Z",
+    "last_updated": "2026-11-22T17:32:22.105413Z",
     "total_records": 142
   },
   "02_web3_smart_contract": {
-    "last_updated": "2026-11-22T09:07:59.609521Z",
+    "last_updated": "2026-11-22T17:32:21.951950Z",
     "total_records": 111
   },
   "06_compiler_errors": {
-    "last_updated": "2026-11-22T09:07:59.726208Z",
+    "last_updated": "2026-11-22T17:32:22.113800Z",
     "total_records": 122
   },
   "07_binary_analysis_forensics": {
-    "last_updated": "2026-11-22T09:07:59.726684Z",
+    "last_updated": "2026-11-22T17:32:22.114321Z",
     "total_records": 4
   },
   "08_captcha_automation_solver": {
-    "last_updated": "2026-11-22T09:07:59.726966Z",
+    "last_updated": "2026-11-22T17:32:22.114647Z",
     "total_records": 4
   },
   "09_captcha_architectures_evolution": {
-    "last_updated": "2026-11-22T09:07:59.727320Z",
+    "last_updated": "2026-11-22T17:32:22.115025Z",
     "total_records": 4
   }
 }
